@@ -179,7 +179,7 @@ function ManagerDetailsPage() {
                 placeholder={t("auth.passwordPlaceholder")}
               />
               <p className="text-sm text-muted-foreground">
-                Leave blank to keep the current password.
+                {t("managers.leaveBlank")}
               </p>
             </div>
 

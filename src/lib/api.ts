@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { createServerFn } from "@tanstack/react-start";
 
 export type Profile = Tables<"profiles">;
 export type Service = Tables<"services">;
@@ -51,59 +52,98 @@ export async function updateLocale(locale: string) {
 
 /* ------------------------------- settings -------------------------------- */
 
-export async function fetchBusinessSettings(): Promise<BusinessSettings | null> {
-  const userId = await requireUserId();
-  const res = await supabase
+export const getGlobalBusinessSettingsFn = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: adminProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("id")
+    .eq("is_admin", true)
+    .limit(1)
+    .single();
+
+  if (!adminProfile) return null;
+
+  const res = await supabaseAdmin
     .from("business_settings")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", adminProfile.id)
     .maybeSingle();
-  if (res.error) throw new Error(res.error.message);
+
   if (res.data) return res.data;
-  const created = await supabase
+
+  // Create it for admin if it doesn't exist
+  const created = await supabaseAdmin
     .from("business_settings")
-    .insert({ user_id: userId, business_name: "London VIP Services" })
+    .insert({ user_id: adminProfile.id, business_name: "London VIP Services" })
     .select("*")
     .single();
-  return unwrap(created);
+
+  return created.data;
+});
+
+export const updateGlobalBusinessNameFn = createServerFn({ method: "POST" })
+  .validator((name: string) => name)
+  .handler(async ({ data: name }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: adminProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("is_admin", true)
+      .limit(1)
+      .single();
+
+    if (adminProfile) {
+      await supabaseAdmin
+        .from("business_settings")
+        .update({ business_name: name })
+        .eq("user_id", adminProfile.id);
+    }
+  });
+
+export async function fetchBusinessSettings(): Promise<BusinessSettings | null> {
+  const data = await getGlobalBusinessSettingsFn();
+  return data as BusinessSettings | null;
 }
 
 export async function updateBusinessName(businessName: string) {
-  const userId = await requireUserId();
-  const res = await supabase
-    .from("business_settings")
-    .update({ business_name: businessName })
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-  return unwrap(res);
+  await updateGlobalBusinessNameFn({ data: businessName });
+  return await fetchBusinessSettings();
 }
 
+export const updateGlobalBusinessLogoFn = createServerFn({ method: "POST" })
+  .validator((path: string | null) => path)
+  .handler(async ({ data: path }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: adminProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("is_admin", true)
+      .limit(1)
+      .single();
+
+    if (adminProfile) {
+      await supabaseAdmin
+        .from("business_settings")
+        .update({ logo_path: path })
+        .eq("user_id", adminProfile.id);
+    }
+  });
+
 export async function uploadLogo(file: File) {
-  const userId = await requireUserId();
+  const userId = await requireUserId(); // We can upload to the current user's bucket folder, but link it globally
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
   const path = `${userId}/logo-${Date.now()}.${ext}`;
   const up = await supabase.storage.from(LOGO_BUCKET).upload(path, file, { upsert: false });
   if (up.error) throw new Error(up.error.message);
-  const res = await supabase
-    .from("business_settings")
-    .update({ logo_path: path })
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-  return unwrap(res);
+  
+  await updateGlobalBusinessLogoFn({ data: path });
+  return await fetchBusinessSettings();
 }
 
 export async function removeLogo(currentPath: string | null) {
-  const userId = await requireUserId();
   if (currentPath) await supabase.storage.from(LOGO_BUCKET).remove([currentPath]);
-  const res = await supabase
-    .from("business_settings")
-    .update({ logo_path: null })
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-  return unwrap(res);
+  await updateGlobalBusinessLogoFn({ data: null });
+  return await fetchBusinessSettings();
 }
 
 export async function signedUrl(bucket: string, path: string | null, expiresIn = 300) {

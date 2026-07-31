@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 
 import { type Profile } from "@/lib/api";
 
-export function AppShell({ children, profile }: { children: ReactNode, profile?: Profile | null }) {
+export function AppShell({ children, profile }: { children: ReactNode; profile?: Profile | null }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -45,13 +45,13 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="no-print sticky top-0 z-40 bg-ink text-ink-foreground">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/dashboard" className="flex items-center gap-3 rounded-sm" aria-label="Go to dashboard">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3 rounded-sm"
+            aria-label="Go to dashboard"
+          >
             {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt=""
-                className="h-8 w-8 rounded-sm object-contain"
-              />
+              <img src={logoUrl} alt="" className="h-8 w-8 rounded-sm object-contain" />
             ) : (
               <span
                 aria-hidden="true"
@@ -98,25 +98,31 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}
+            {open ? (
+              <X aria-hidden="true" className="h-5 w-5" />
+            ) : (
+              <Menu aria-hidden="true" className="h-5 w-5" />
+            )}
           </button>
         </div>
         <div className="gold-rule h-px w-full opacity-70" aria-hidden="true" />
 
         {open ? (
           <nav aria-label="Mobile" className="border-t border-white/10 bg-ink px-4 pb-4 md:hidden">
-            {NAV_KEYS.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-ink-foreground/80 hover:bg-white/10"
-                activeProps={{ className: "bg-white/10 text-ink-foreground" }}
-              >
-                <item.icon aria-hidden="true" className="h-4 w-4" />
-                {t(item.labelKey)}
-              </Link>
-            ))}
+            {NAV_KEYS.filter((item) => profile?.is_admin || item.to === "/dashboard").map(
+              (item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-ink-foreground/80 hover:bg-white/10"
+                  activeProps={{ className: "bg-white/10 text-ink-foreground" }}
+                >
+                  <item.icon aria-hidden="true" className="h-4 w-4" />
+                  {t(item.labelKey)}
+                </Link>
+              ),
+            )}
             <button
               type="button"
               onClick={handleSignOut}
@@ -130,10 +136,6 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
-
-      <footer className="no-print border-t border-border py-6 text-center text-xs text-muted-foreground">
-        Generative Receipts — private, owner-only records. All amounts in GBP.
-      </footer>
     </div>
   );
 }
