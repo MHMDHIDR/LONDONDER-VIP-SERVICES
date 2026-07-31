@@ -39,12 +39,12 @@ import {
 export const Route = createFileRoute("/_authenticated/receipts/new")({
   head: () => ({
     meta: [
-      { title: "New receipt — Generative Receipts" },
+      { title: "New receipt, Generative Receipts" },
       {
         name: "description",
         content: "Generate a GBP receipt with historically accurate service pricing.",
       },
-      { property: "og:title", content: "New receipt — Generative Receipts" },
+      { property: "og:title", content: "New receipt, Generative Receipts" },
       { property: "og:description", content: "Create a premium receipt in seconds." },
     ],
   }),
@@ -303,12 +303,14 @@ function NewReceiptPage() {
                   maxLength={160}
                   onChange={(e) => setPaOrderId(e.target.value.replace(/\D/g, ""))}
                   onKeyDown={(e) => {
-                    if (!/[\d\b]/.test(e.key) && 
-                        e.key !== "Backspace" && 
-                        e.key !== "ArrowLeft" && 
-                        e.key !== "ArrowRight" && 
-                        e.key !== "Tab" && 
-                        e.key !== "Delete") {
+                    if (
+                      !/[\d\b]/.test(e.key) &&
+                      e.key !== "Backspace" &&
+                      e.key !== "ArrowLeft" &&
+                      e.key !== "ArrowRight" &&
+                      e.key !== "Tab" &&
+                      e.key !== "Delete"
+                    ) {
                       e.preventDefault();
                     }
                   }}
@@ -469,7 +471,11 @@ function NewReceiptPage() {
                 <dt className="text-muted-foreground">{t("receipt.service")}</dt>
                 <dd className="text-right">
                   {selectedService ? (
-                    <Link to="/services/$id" params={{ id: selectedService.id }} className="hover:underline">
+                    <Link
+                      to="/services/$id"
+                      params={{ id: selectedService.id }}
+                      className="hover:underline"
+                    >
                       {selectedService.name}
                     </Link>
                   ) : (

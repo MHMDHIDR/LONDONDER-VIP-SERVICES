@@ -34,7 +34,7 @@
     "confirmEmailTitle": "Confirm your email",
     "heroSubtitle": "Concierge & Business Services",
     "heroTitle": "Receipts worthy of the service you provide.",
-    "heroDescription": "Historic pricing, immutable receipt numbers and A4-ready PDFs — all private to your account, all in pounds sterling.",
+    "heroDescription": "Historic pricing, immutable receipt numbers and A4-ready PDFs, all private to your account, all in pounds sterling.",
     "heroIsolation": "Owner-only data isolation on every record.",
     "brandName": "Generative Receipts"
   },
@@ -115,7 +115,7 @@
   "services": {
     "title": "Services",
     "catalogue": "Catalogue",
-    "description": "Each service keeps a full price history. Editing a price closes the previous period and opens a new one — past receipts never change.",
+    "description": "Each service keeps a full price history. Editing a price closes the previous period and opens a new one, past receipts never change.",
     "showArchived": "Show archived",
     "searchServices": "Search services",
     "newService": "New service",

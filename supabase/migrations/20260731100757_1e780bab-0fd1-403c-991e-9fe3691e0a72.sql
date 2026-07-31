@@ -297,19 +297,19 @@ BEGIN
   ON CONFLICT (user_id) DO NOTHING;
 
   INSERT INTO public.services (user_id, name, description)
-  VALUES (NEW.id, 'Sample — Airport Chauffeur Transfer', 'Sample service. Private chauffeur transfer with meet and greet.')
+  VALUES (NEW.id, 'Sample, Airport Chauffeur Transfer', 'Sample service. Private chauffeur transfer with meet and greet.')
   RETURNING id INTO _sid;
   INSERT INTO public.service_prices (service_id, user_id, amount_pence, valid_from)
   VALUES (_sid, NEW.id, 18500, now() - interval '1 year');
 
   INSERT INTO public.services (user_id, name, description)
-  VALUES (NEW.id, 'Sample — Personal Concierge Day Rate', 'Sample service. Full-day dedicated concierge support.')
+  VALUES (NEW.id, 'Sample, Personal Concierge Day Rate', 'Sample service. Full-day dedicated concierge support.')
   RETURNING id INTO _sid;
   INSERT INTO public.service_prices (service_id, user_id, amount_pence, valid_from)
   VALUES (_sid, NEW.id, 45000, now() - interval '1 year');
 
   INSERT INTO public.services (user_id, name, description)
-  VALUES (NEW.id, 'Sample — Event Reservation Management', 'Sample service. Priority bookings and reservation handling.')
+  VALUES (NEW.id, 'Sample, Event Reservation Management', 'Sample service. Priority bookings and reservation handling.')
   RETURNING id INTO _sid;
   INSERT INTO public.service_prices (service_id, user_id, amount_pence, valid_from)
   VALUES (_sid, NEW.id, 12500, now() - interval '1 year');

@@ -19,13 +19,13 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Sign in — Generative Receipts" },
+      { title: "Sign in, Generative Receipts" },
       {
         name: "description",
         content:
           "Sign in or create your Generative Receipts account to issue premium GBP receipts for concierge services.",
       },
-      { property: "og:title", content: "Sign in — Generative Receipts" },
+      { property: "og:title", content: "Sign in, Generative Receipts" },
       {
         property: "og:description",
         content: "Secure access to your concierge receipt studio.",
@@ -106,9 +106,7 @@ function AuthPage() {
           <p className="text-[0.65rem] uppercase tracking-[0.28em] text-gold">
             {t("auth.heroSubtitle")}
           </p>
-          <h2 className="mt-4 font-display text-5xl leading-tight">
-            {t("auth.heroTitle")}
-          </h2>
+          <h2 className="mt-4 font-display text-5xl leading-tight">{t("auth.heroTitle")}</h2>
           <p className="mt-5 text-sm leading-relaxed text-ink-foreground/70">
             {t("auth.heroDescription")}
           </p>
@@ -121,7 +119,7 @@ function AuthPage() {
 
       <section className="flex items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-md">
-            <div className="mb-8 text-center lg:hidden">
+          <div className="mb-8 text-center lg:hidden">
             <span className="gold-rule inline-flex h-11 w-11 items-center justify-center rounded-sm font-display text-base font-bold text-gold-foreground">
               GR
             </span>
@@ -153,11 +151,8 @@ function AuthPage() {
                 {forgot ? t("auth.resetPassword") : t("auth.signIn")}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {forgot
-                  ? t("auth.resetMessage")
-                  : t("auth.welcome")}
+                {forgot ? t("auth.resetMessage") : t("auth.welcome")}
               </p>
-
 
               <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-2">
@@ -206,7 +201,13 @@ function AuthPage() {
                   </p>
                 ) : null}
 
-                <Button type="submit" variant="premium" size="lg" className="w-full" disabled={busy}>
+                <Button
+                  type="submit"
+                  variant="premium"
+                  size="lg"
+                  className="w-full"
+                  disabled={busy}
+                >
                   {busy ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
                   {forgot ? t("auth.sendResetLink") : t("auth.signIn")}
                 </Button>

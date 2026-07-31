@@ -242,6 +242,7 @@ export async function fetchReceipts(opts: {
   let query = supabase
     .from("receipts")
     .select("*", { count: "exact" })
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(opts.offset, opts.offset + opts.limit - 1);
 
@@ -268,7 +269,7 @@ export async function fetchReceipt(id: string): Promise<{
   attachments: ReceiptAttachment[];
 } | null> {
   const receipt = unwrap(
-    await supabase.from("receipts").select("*").eq("id", id).maybeSingle(),
+    await supabase.from("receipts").select("*").eq("id", id).is("deleted_at", null).maybeSingle(),
   ) as Receipt | null;
   if (!receipt) return null;
   const items =
@@ -341,4 +342,12 @@ export async function storeReceiptPdf(receiptId: string, receiptNumber: string, 
   if (up.error) throw new Error(up.error.message);
   await supabase.from("receipts").update({ pdf_path: path }).eq("id", receiptId);
   return path;
+}
+
+export async function softDeleteReceipt(receiptId: string, pdfPath?: string | null) {
+  const { error } = await supabase.from("receipts").update({ deleted_at: new Date().toISOString() }).eq("id", receiptId);
+  if (error) throw new Error(error.message);
+  if (pdfPath) {
+    await supabase.storage.from(PDF_BUCKET).remove([pdfPath]);
+  }
 }

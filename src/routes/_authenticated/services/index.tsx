@@ -37,12 +37,12 @@ export const Route = createFileRoute("/_authenticated/services/")({
   },
   head: () => ({
     meta: [
-      { title: "Services — Generative Receipts" },
+      { title: "Services, Generative Receipts" },
       {
         name: "description",
         content: "Manage concierge services, archive old ones and keep a full GBP price history.",
       },
-      { property: "og:title", content: "Services — Generative Receipts" },
+      { property: "og:title", content: "Services, Generative Receipts" },
       { property: "og:description", content: "Service catalogue and price history." },
     ],
   }),

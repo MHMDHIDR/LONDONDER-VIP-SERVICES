@@ -42,23 +42,22 @@ const createUserFn = createServerFn({ method: "POST" })
   });
 
 // Define the server function to list users
-const listUsersFn = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: usersData, error } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    // We filter to remove full sensitive data, returning just what we need
-    return usersData.users.map(u => ({
-      id: u.id,
-      email: u.email,
-      created_at: u.created_at,
-      full_name: u.user_metadata?.full_name || "Unknown",
-    }));
-  });
+const listUsersFn = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: usersData, error } = await supabaseAdmin.auth.admin.listUsers();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // We filter to remove full sensitive data, returning just what we need
+  return usersData.users.map((u) => ({
+    id: u.id,
+    email: u.email,
+    created_at: u.created_at,
+    full_name: u.user_metadata?.full_name || "Unknown",
+  }));
+});
 
 export const Route = createFileRoute("/_authenticated/managers/")({
   beforeLoad: ({ context }) => {
@@ -66,7 +65,7 @@ export const Route = createFileRoute("/_authenticated/managers/")({
   },
   head: () => ({
     meta: [
-      { title: "Managers — Generative Receipts" },
+      { title: "Managers, Generative Receipts" },
       { name: "description", content: "Manage users and permissions." },
     ],
   }),
@@ -110,12 +109,16 @@ function ManagersPage() {
     }
   }
 
-  const { data: managersRaw, isLoading, refetch } = useQuery({
+  const {
+    data: managersRaw,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["managers-list"],
     queryFn: () => listUsersFn(),
   });
 
-  const managers = managersRaw?.filter(m => m.id !== profile?.id) || [];
+  const managers = managersRaw?.filter((m) => m.id !== profile?.id) || [];
 
   return (
     <>
@@ -193,7 +196,9 @@ function ManagersPage() {
               <Users className="h-5 w-5 text-gold" />
               <h2 className="font-display text-2xl">{t("managers.existingManagers")}</h2>
             </div>
-            {isLoading ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+            {isLoading ? (
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : null}
           </div>
 
           <div className="space-y-3">
@@ -219,11 +224,9 @@ function ManagersPage() {
                 </div>
               </Link>
             ))}
-            
+
             {managers.length === 0 && !isLoading && (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No managers found.
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-8">No managers found.</p>
             )}
           </div>
         </section>

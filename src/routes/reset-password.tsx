@@ -11,9 +11,9 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Choose a new password — Generative Receipts" },
+      { title: "Choose a new password, Generative Receipts" },
       { name: "description", content: "Set a new password for your Generative Receipts account." },
-      { property: "og:title", content: "Choose a new password — Generative Receipts" },
+      { property: "og:title", content: "Choose a new password, Generative Receipts" },
       { property: "og:description", content: "Set a new password for your account." },
     ],
   }),
@@ -91,7 +91,13 @@ function ResetPasswordPage() {
               {error}
             </p>
           ) : null}
-          <Button type="submit" variant="premium" size="lg" className="w-full" disabled={!ready || busy}>
+          <Button
+            type="submit"
+            variant="premium"
+            size="lg"
+            className="w-full"
+            disabled={!ready || busy}
+          >
             {busy ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
             Update password
           </Button>

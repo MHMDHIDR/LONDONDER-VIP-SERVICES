@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/services/$id")({
   head: () => ({
-    meta: [{ title: "Service Details — Generative Receipts" }],
+    meta: [{ title: "Service Details, Generative Receipts" }],
   }),
   component: ServiceDetailsPage,
 });
@@ -66,7 +66,7 @@ function ServiceDetailsPage() {
     doc.setFontSize(16);
     doc.text(`Price History: ${service.name}`, 14, 20);
     doc.setFontSize(10);
-    
+
     let y = 30;
     prices.forEach((p, index) => {
       const priceStr = formatPence(p.amount_pence);
@@ -133,11 +133,17 @@ function ServiceDetailsPage() {
                     )}
                   </div>
                   <div className="text-sm text-muted-foreground mt-2">
-                    Valid from: <strong className="text-foreground">{dateTimeLabel(price.valid_from, "")}</strong>
+                    Valid from:{" "}
+                    <strong className="text-foreground">
+                      {dateTimeLabel(price.valid_from, "")}
+                    </strong>
                   </div>
                   {price.valid_to && (
                     <div className="text-sm text-muted-foreground">
-                      Valid to: <strong className="text-foreground">{dateTimeLabel(price.valid_to, "")}</strong>
+                      Valid to:{" "}
+                      <strong className="text-foreground">
+                        {dateTimeLabel(price.valid_to, "")}
+                      </strong>
                     </div>
                   )}
                 </div>

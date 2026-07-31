@@ -3,8 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle } from "lucide-react";
-import { LOGO_BUCKET, fetchReceipt, signedUrl, storeReceiptPdf } from "@/lib/api";
+import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2 } from "lucide-react";
+import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { formatDateLong, formatPence } from "@/lib/money";
 import { buildReceiptPdf, downloadBlob } from "@/lib/pdf";
 import { Button } from "@/components/ui/button";
@@ -16,9 +28,9 @@ export const Route = createFileRoute("/_authenticated/receipts/$id")({
   }),
   head: () => ({
     meta: [
-      { title: "Receipt — Generative Receipts" },
+      { title: "Receipt, Generative Receipts" },
       { name: "description", content: "View, download and share a generated GBP receipt." },
-      { property: "og:title", content: "Receipt — Generative Receipts" },
+      { property: "og:title", content: "Receipt, Generative Receipts" },
       { property: "og:description", content: "Printable A4 receipt preview." },
     ],
   }),
@@ -27,14 +39,26 @@ export const Route = createFileRoute("/_authenticated/receipts/$id")({
 
 function ReceiptPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { id } = Route.useParams();
   const { download } = Route.useSearch();
   const [busy, setBusy] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [autoRan, setAutoRan] = useState(false);
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["receipt", id],
     queryFn: () => fetchReceipt(id),
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
+      return data;
+    }
   });
 
   const receipt = data?.receipt ?? null;
@@ -74,7 +98,7 @@ function ReceiptPage() {
   }, [download, receipt, autoRan]);
 
   const shareText = receipt
-    ? `Receipt ${receipt.receipt_number} from ${receipt.business_name_snapshot} — ${formatPence(
+    ? `Receipt ${receipt.receipt_number} from ${receipt.business_name_snapshot}, ${formatPence(
         receipt.total_pence,
       )} issued ${formatDateLong(receipt.issue_date)}.`
     : "";
@@ -98,7 +122,7 @@ function ReceiptPage() {
         setBusy(false);
         return;
       }
-      
+
       // Fallback: Generate signed URL and append to text
       let pdfPath = receipt.pdf_path;
       if (!pdfPath) {
@@ -115,18 +139,38 @@ function ReceiptPage() {
     }
 
     if (target === "whatsapp") {
-      window.open(`https://wa.me/?text=${encodeURIComponent(finalShareText)}`, "_blank", "noopener");
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(finalShareText)}`,
+        "_blank",
+        "noopener",
+      );
     } else {
       if (navigator.share) {
-         try {
-           await navigator.share({ title: `Receipt ${receipt.receipt_number}`, text: finalShareText });
-         } catch {
-           // ignored
-         }
+        try {
+          await navigator.share({
+            title: `Receipt ${receipt.receipt_number}`,
+            text: finalShareText,
+          });
+        } catch {
+          // ignored
+        }
       } else {
-         toast.success("Link copied to clipboard (native share not supported)");
-         navigator.clipboard.writeText(finalShareText);
+        toast.success("Link copied to clipboard (native share not supported)");
+        navigator.clipboard.writeText(finalShareText);
       }
+    }
+  }
+
+  async function handleDelete() {
+    if (!receipt || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await softDeleteReceipt(receipt.id, receipt.pdf_path);
+      toast.success(t("receipt.deleted"));
+      navigate({ to: "/dashboard" });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete receipt");
+      setIsDeleting(false);
     }
   }
 
@@ -166,11 +210,21 @@ function ReceiptPage() {
             )}
             {t("receipt.downloadPdf")}
           </Button>
-          <Button variant="outline" className="gap-2 rounded-full px-6 text-[15px]" onClick={() => handleShare("native")} disabled={busy}>
+          <Button
+            variant="outline"
+            className="gap-2 rounded-full px-6 text-[15px]"
+            onClick={() => handleShare("native")}
+            disabled={busy}
+          >
             <Share2 aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
             {t("receipt.share")}
           </Button>
-          <Button variant="outline" className="gap-2 rounded-full px-6 text-[15px]" onClick={() => handleShare("whatsapp")} disabled={busy}>
+          <Button
+            variant="outline"
+            className="gap-2 rounded-full px-6 text-[15px]"
+            onClick={() => handleShare("whatsapp")}
+            disabled={busy}
+          >
             <MessageCircle aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
             WhatsApp
           </Button>
@@ -184,6 +238,30 @@ function ReceiptPage() {
               {t("receipt.email")}
             </a>
           </Button>
+          {profile?.is_admin && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="gap-2 rounded-full px-6 text-[15px]" disabled={isDeleting}>
+                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin ms-0 me-2" /> : <Trash2 className="h-4 w-4 ms-0 me-2" />}
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will delete receipt {receipt.receipt_number}. It will be removed from your dashboard and the PDF document will be permanently deleted from storage.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 
@@ -224,15 +302,16 @@ function ReceiptPage() {
               {receipt.service_name_snapshot || t("receipt.custom")}
             </p>
             {receipt.pa_order_id ? (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="inline-block mt-2 rounded-md bg-muted px-2 py-1 text-sm font-bold text-foreground">
                 {t("receipt.paOrder")}: {receipt.pa_order_id}
               </p>
             ) : null}
           </div>
         </section>
 
-        <table className="mt-8 w-full text-sm">
-          <caption className="sr-only">Receipt line items</caption>
+        <div className="mt-8 overflow-x-auto w-full">
+          <table className="w-full text-sm min-w-[600px] text-left">
+            <caption className="sr-only">Receipt line items</caption>
           <thead>
             <tr className="border-b border-border text-start">
               <th scope="col" className="pb-2 font-medium">
@@ -258,13 +337,20 @@ function ReceiptPage() {
                     <span className="block text-muted-foreground">{item.description}</span>
                   ) : null}
                 </td>
-                    <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[80px]">{item.quantity}</td>
-                    <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[100px]">{formatPence(item.unit_price_pence)}</td>
-                    <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-[100px]">{formatPence(item.line_total_pence)}</td>
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[80px]">
+                  {item.quantity}
+                </td>
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                  {formatPence(item.unit_price_pence)}
+                </td>
+                <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                  {formatPence(item.line_total_pence)}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
 
         <div className="mt-6 flex justify-end">
           <dl className="w-full max-w-xs space-y-2 text-sm">

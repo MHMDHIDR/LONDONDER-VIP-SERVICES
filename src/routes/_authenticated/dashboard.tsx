@@ -15,9 +15,9 @@ const PAGE_SIZE = 11;
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Generative Receipts" },
+      { title: "Dashboard, Generative Receipts" },
       { name: "description", content: "Browse, search and download your generated GBP receipts." },
-      { property: "og:title", content: "Dashboard — Generative Receipts" },
+      { property: "og:title", content: "Dashboard, Generative Receipts" },
       { property: "og:description", content: "Your saved concierge service receipts." },
     ],
   }),
@@ -73,7 +73,9 @@ function DashboardPage() {
           />
         </div>
         <p aria-live="polite" className="text-sm text-muted-foreground">
-          {isPending ? t("dashboard.loadingReceipts") : `${total} ${total === 1 ? t("dashboard.receiptCount") : t("dashboard.receiptsCount")}`}
+          {isPending
+            ? t("dashboard.loadingReceipts")
+            : `${total} ${total === 1 ? t("dashboard.receiptCount") : t("dashboard.receiptsCount")}`}
           {isFetching && !isPending ? t("dashboard.updating") : ""}
         </p>
       </div>
@@ -98,9 +100,7 @@ function DashboardPage() {
               <Plus aria-hidden="true" className="h-8 w-8" />
             </span>
             <span className="font-display text-xl">{t("dashboard.generateNew")}</span>
-            <span className="text-xs text-muted-foreground">
-              {t("dashboard.generateNewDesc")}
-            </span>
+            <span className="text-xs text-muted-foreground">{t("dashboard.generateNewDesc")}</span>
           </Link>
         </li>
 
@@ -148,7 +148,11 @@ function DashboardPage() {
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="secondary" className="flex-1">
-                      <Link to="/receipts/$id" params={{ id: receipt.id }} search={{ download: true }}>
+                      <Link
+                        to="/receipts/$id"
+                        params={{ id: receipt.id }}
+                        search={{ download: true }}
+                      >
                         <Download aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
                         {t("dashboard.pdf")}
                       </Link>
@@ -166,16 +170,18 @@ function DashboardPage() {
             {search ? t("dashboard.noReceiptsSearch") : t("dashboard.noReceipts")}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            {search
-              ? t("dashboard.noReceiptsSearchDesc")
-              : t("dashboard.noReceiptsDesc")}
+            {search ? t("dashboard.noReceiptsSearchDesc") : t("dashboard.noReceiptsDesc")}
           </p>
         </div>
       ) : null}
 
       {rows.length < total ? (
         <div className="mt-8 flex justify-center">
-          <Button variant="outline" onClick={() => setLimit((v) => v + PAGE_SIZE)} disabled={isFetching}>
+          <Button
+            variant="outline"
+            onClick={() => setLimit((v) => v + PAGE_SIZE)}
+            disabled={isFetching}
+          >
             {isFetching ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
             {t("dashboard.loadMore", { count: total - rows.length })}
           </Button>

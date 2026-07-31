@@ -36,9 +36,9 @@ export const Route = createFileRoute("/_authenticated/settings")({
   },
   head: () => ({
     meta: [
-      { title: "Settings — Generative Receipts" },
+      { title: "Settings, Generative Receipts" },
       { name: "description", content: "Manage your business name and logo used on new receipts." },
-      { property: "og:title", content: "Settings — Generative Receipts" },
+      { property: "og:title", content: "Settings, Generative Receipts" },
       { property: "og:description", content: "Business branding for your receipts." },
     ],
   }),
