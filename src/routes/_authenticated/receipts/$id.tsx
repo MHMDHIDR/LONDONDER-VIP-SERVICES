@@ -226,9 +226,9 @@ function ReceiptPage() {
                     <span className="block text-muted-foreground">{item.description}</span>
                   ) : null}
                 </td>
-                <td className="py-3 text-end">{item.quantity}</td>
-                <td className="py-3 text-end">{formatPence(item.unit_price_pence)}</td>
-                <td className="py-3 text-end">{formatPence(item.line_total_pence)}</td>
+                    <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[80px]">{item.quantity}</td>
+                    <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[100px]">{formatPence(item.unit_price_pence)}</td>
+                    <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-[100px]">{formatPence(item.line_total_pence)}</td>
               </tr>
             ))}
           </tbody>

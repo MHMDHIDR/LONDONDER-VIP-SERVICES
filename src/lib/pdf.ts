@@ -44,6 +44,7 @@ export async function buildReceiptPdf(args: {
 
   const logo = args.logoUrl ? await loadImageDataUrl(args.logoUrl) : null;
   if (logo) {
+    // Top logo
     const h = 16;
     const w = Math.min(48, h * logo.ratio);
     try {
@@ -51,6 +52,27 @@ export async function buildReceiptPdf(args: {
     } catch {
       /* ignore unsupported image */
     }
+    
+    // Watermark in the center of the page
+    try {
+      doc.saveGraphicsState();
+      doc.setGState(new (doc as any).GState({ opacity: 0.05 }));
+      const wmWidth = Math.min(PAGE_WIDTH - 80, 120);
+      const wmHeight = wmWidth / logo.ratio;
+      doc.addImage(
+        logo.data,
+        (PAGE_WIDTH - wmWidth) / 2,
+        (PAGE_HEIGHT - wmHeight) / 2 - 20,
+        wmWidth,
+        wmHeight,
+        undefined,
+        "FAST"
+      );
+      doc.restoreGraphicsState();
+    } catch {
+      /* ignore if GState fails */
+    }
+
     y += h + 6;
   }
 
@@ -102,9 +124,9 @@ export async function buildReceiptPdf(args: {
   doc.rect(MARGIN, y - 5, PAGE_WIDTH - MARGIN * 2, 8, "F");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("DESCRIPTION", MARGIN + 3, y);
-  doc.text("QTY", PAGE_WIDTH - MARGIN - 68, y, { align: "right" });
-  doc.text("UNIT", PAGE_WIDTH - MARGIN - 36, y, { align: "right" });
+  doc.text("DESCRIPTION", MARGIN, y);
+  doc.text("QTY", PAGE_WIDTH - MARGIN - 50, y, { align: "right" });
+  doc.text("UNIT", PAGE_WIDTH - MARGIN - 25, y, { align: "right" });
   doc.text("AMOUNT", PAGE_WIDTH - MARGIN - 3, y, { align: "right" });
   y += 9;
 
@@ -116,17 +138,17 @@ export async function buildReceiptPdf(args: {
     }
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    const nameLines = doc.splitTextToSize(item.name, 95) as string[];
-    doc.text(nameLines, MARGIN + 3, y);
+    const nameLines = doc.splitTextToSize(item.name, 110) as string[];
+    doc.text(nameLines, MARGIN, y);
     let blockHeight = nameLines.length * 4.6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text(String(Number(item.quantity)), PAGE_WIDTH - MARGIN - 68, y, { align: "right" });
-    doc.text(formatPence(item.unit_price_pence), PAGE_WIDTH - MARGIN - 36, y, { align: "right" });
+    doc.text(String(item.quantity), PAGE_WIDTH - MARGIN - 50, y, { align: "right" });
+    doc.text(formatPence(item.unit_price_pence), PAGE_WIDTH - MARGIN - 25, y, { align: "right" });
     doc.text(formatPence(item.line_total_pence), PAGE_WIDTH - MARGIN - 3, y, { align: "right" });
     if (item.description) {
       doc.setTextColor(...MUTED);
-      const descLines = doc.splitTextToSize(item.description, 95) as string[];
+      const descLines = doc.splitTextToSize(item.description, 110) as string[];
       doc.text(descLines, MARGIN + 3, y + blockHeight + 0.5);
       blockHeight += descLines.length * 4.2 + 1;
       doc.setTextColor(...INK);
