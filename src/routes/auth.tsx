@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Mail, ShieldCheck } from "lucide-react";
@@ -40,6 +41,7 @@ const credentials = z.object({
 });
 
 function AuthPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const [tab, setTab] = useState<string>("signin");
@@ -102,35 +104,34 @@ function AuthPage() {
         </div>
         <div className="max-w-md">
           <p className="text-[0.65rem] uppercase tracking-[0.28em] text-gold">
-            Concierge &amp; Business Services
+            {t("auth.heroSubtitle")}
           </p>
           <h2 className="mt-4 font-display text-5xl leading-tight">
-            Receipts worthy of the service you provide.
+            {t("auth.heroTitle")}
           </h2>
           <p className="mt-5 text-sm leading-relaxed text-ink-foreground/70">
-            Historic pricing, immutable receipt numbers and A4-ready PDFs — all private to your
-            account, all in pounds sterling.
+            {t("auth.heroDescription")}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-ink-foreground/60">
           <ShieldCheck aria-hidden="true" className="h-4 w-4 text-gold" />
-          Owner-only data isolation on every record.
+          {t("auth.heroIsolation")}
         </div>
       </section>
 
       <section className="flex items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-md">
-          <div className="mb-8 text-center lg:hidden">
+            <div className="mb-8 text-center lg:hidden">
             <span className="gold-rule inline-flex h-11 w-11 items-center justify-center rounded-sm font-display text-base font-bold text-gold-foreground">
               GR
             </span>
-            <h1 className="mt-4 font-display text-3xl">Generative Receipts</h1>
+            <h1 className="mt-4 font-display text-3xl">{t("auth.brandName")}</h1>
           </div>
 
           {checkEmail ? (
             <div className="surface-card rounded-xl p-8 text-center">
               <Mail aria-hidden="true" className="mx-auto h-8 w-8 text-gold" />
-              <h2 className="mt-4 font-display text-2xl">Confirm your email</h2>
+              <h2 className="mt-4 font-display text-2xl">{t("auth.confirmEmailTitle")}</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 We sent a confirmation link to <strong>{email}</strong>. Open it to activate your
                 account, then sign in.
@@ -143,24 +144,24 @@ function AuthPage() {
                   setTab("signin");
                 }}
               >
-                Back to sign in
+                {t("auth.backToSignIn")}
               </Button>
             </div>
           ) : (
             <div className="surface-card rounded-xl p-6 sm:p-8">
               <h1 className="hidden font-display text-3xl lg:block">
-                {forgot ? "Reset password" : "Sign in"}
+                {forgot ? t("auth.resetPassword") : t("auth.signIn")}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {forgot
-                  ? "We'll email you a secure link to choose a new password."
-                  : "Your receipts, services and pricing history stay private to your account."}
+                  ? t("auth.resetMessage")
+                  : t("auth.welcome")}
               </p>
 
 
               <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email address</Label>
+                  <Label htmlFor="email">{t("common.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -168,21 +169,21 @@ function AuthPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.co.uk"
+                    placeholder={t("auth.emailPlaceholder")}
                   />
                 </div>
 
                 {!forgot ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{t("common.password")}</Label>
                       {tab === "signin" ? (
                         <button
                           type="button"
                           className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
                           onClick={() => setForgot(true)}
                         >
-                          Forgot password?
+                          {t("auth.forgotPassword")}
                         </button>
                       ) : null}
                     </div>
@@ -194,7 +195,7 @@ function AuthPage() {
                       minLength={8}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="At least 8 characters"
+                      placeholder={t("auth.passwordPlaceholder")}
                     />
                   </div>
                 ) : null}
@@ -207,7 +208,7 @@ function AuthPage() {
 
                 <Button type="submit" variant="premium" size="lg" className="w-full" disabled={busy}>
                   {busy ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-                  {forgot ? "Send reset link" : "Sign in"}
+                  {forgot ? t("auth.sendResetLink") : t("auth.signIn")}
                 </Button>
 
                 {forgot ? (
@@ -217,7 +218,7 @@ function AuthPage() {
                     className="w-full"
                     onClick={() => setForgot(false)}
                   >
-                    Back to sign in
+                    {t("auth.backToSignIn")}
                   </Button>
                 ) : null}
               </form>

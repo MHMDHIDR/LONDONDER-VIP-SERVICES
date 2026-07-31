@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Plus, Search, Loader2, Archive, ArchiveRestore, Pencil, TrendingUp } from "lucide-react";
 import {
@@ -59,8 +60,8 @@ function bucketOf(price: ServicePrice): PriceBucket {
   return "current";
 }
 
-function dateTimeLabel(value: string | null) {
-  if (!value) return "ongoing";
+function dateTimeLabel(value: string | null, ongoingText: string) {
+  if (!value) return ongoingText;
   return new Date(value).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -69,6 +70,7 @@ function dateTimeLabel(value: string | null) {
 }
 
 function ServicesPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -126,13 +128,13 @@ function ServicesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Catalogue"
-        title="Services"
-        description="Each service keeps a full price history. Editing a price closes the previous period and opens a new one — past receipts never change."
+        eyebrow={t("services.catalogue")}
+        title={t("services.title")}
+        description={t("services.description")}
         actions={
           <Button variant="premium" size="lg" onClick={() => setCreateOpen(true)}>
-            <Plus aria-hidden="true" className="h-4 w-4" />
-            New service
+            <Plus aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+            {t("services.newService")}
           </Button>
         }
       />
@@ -141,13 +143,13 @@ function ServicesPage() {
         <div className="relative w-full max-w-sm">
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
             aria-label="Search services"
-            placeholder="Search services"
-            className="pl-9"
+            placeholder={t("services.searchServices")}
+            className="ps-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -155,7 +157,7 @@ function ServicesPage() {
         <div className="flex items-center gap-2">
           <Switch id="show-archived" checked={showArchived} onCheckedChange={setShowArchived} />
           <Label htmlFor="show-archived" className="text-sm text-muted-foreground">
-            Show archived
+            {t("services.showArchived")}
           </Label>
         </div>
       </div>
@@ -201,8 +203,8 @@ function ServicesPage() {
                         </p>
                       ) : null}
                     </div>
-                    <div className="text-right">
-                      <p className="text-eyebrow">Current price</p>
+                    <div className="text-end">
+                      <p className="text-eyebrow">{t("services.currentPrice")}</p>
                       <p className="font-display text-3xl">
                         {current ? formatPence(current.amount_pence) : "—"}
                       </p>
@@ -211,12 +213,12 @@ function ServicesPage() {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     <Button size="sm" variant="outline" onClick={() => setEditing(service)}>
-                      <Pencil aria-hidden="true" className="h-4 w-4" />
-                      Edit details
+                      <Pencil aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+                      {t("services.editDetails")}
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => setPricing(service)}>
-                      <TrendingUp aria-hidden="true" className="h-4 w-4" />
-                      Change price
+                      <TrendingUp aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+                      {t("services.changePrice")}
                     </Button>
                     <Button
                       size="sm"
@@ -225,16 +227,16 @@ function ServicesPage() {
                       disabled={archive.isPending}
                     >
                       {service.active ? (
-                        <Archive aria-hidden="true" className="h-4 w-4" />
+                        <Archive aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
                       ) : (
-                        <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
+                        <ArchiveRestore aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
                       )}
-                      {service.active ? "Archive" : "Restore"}
+                      {service.active ? t("services.archive") : t("services.archive")}
                     </Button>
                   </div>
 
                   <div className="mt-6 border-t border-border pt-5">
-                    <h3 className="text-eyebrow mb-3">Price history</h3>
+                    <h3 className="text-eyebrow mb-3">{t("services.priceHistory")}</h3>
                     <ol className="space-y-2">
                       {[...upcoming, ...(current ? [current] : []), ...past].map((price) => {
                         const bucket = bucketOf(price);
@@ -256,7 +258,7 @@ function ServicesPage() {
                               <span className="font-medium">{formatPence(price.amount_pence)}</span>
                             </span>
                             <span className="text-muted-foreground">
-                              {dateTimeLabel(price.valid_from)} → {dateTimeLabel(price.valid_to)}
+                              {dateTimeLabel(price.valid_from, t("services.ongoing"))} &rarr; {dateTimeLabel(price.valid_to, t("services.ongoing"))}
                             </span>
                           </li>
                         );

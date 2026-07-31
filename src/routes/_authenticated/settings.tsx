@@ -120,22 +120,22 @@ function SettingsPage() {
       setFileError("Logo must be 2 MB or smaller.");
       return;
     }
-    upload.mutate(file);
+    uploadLogoMutation.mutate(file);
   }
 
   return (
     <>
       <PageHeader
-        eyebrow="Account"
+        eyebrow={t("settings.title")}
         title={t("settings.title")}
         description={t("settings.description")}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="surface-card rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4 flex items-center gap-2">
             <Globe className="h-5 w-5 text-gold" />
-            <h2 className="font-display text-2xl">{t("settings.languageAndRegion")}</h2>
+            <h2 className="font-display text-xl">{t("settings.languageAndRegion")}</h2>
           </div>
           <p className="mb-6 text-sm text-muted-foreground">
             {t("settings.languageDescription")}
@@ -160,50 +160,40 @@ function SettingsPage() {
         </section>
 
         <section className="surface-card rounded-xl p-6">
-          <h2 className="font-display text-2xl">Business name</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Shown in the app header and printed on new receipts.
+          <h2 className="font-display text-xl">{t("settings.businessName")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("settings.businessNameDesc")}
           </p>
-          {isPending ? (
-            <Skeleton className="mt-6 h-10 w-full" />
-          ) : (
-            <form
-              className="mt-6 space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                const trimmed = currentName.trim();
-                if (trimmed.length < 2) {
-                  toast.error("Business name must be at least 2 characters");
-                  return;
-                }
-                saveName.mutate(trimmed.slice(0, 120));
-              }}
-            >
-              <div className="space-y-2">
-                <Label htmlFor="business-name">Name</Label>
-                <Input
-                  id="business-name"
-                  value={currentName}
-                  maxLength={120}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" variant="premium" disabled={saveName.isPending}>
-                {saveName.isPending ? (
-                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
-                ) : null}
-                Save changes
-              </Button>
-            </form>
-          )}
+
+          <form
+            className="mt-6 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (businessName.trim() === profile?.business_name || saveName.isPending) return;
+              saveName.mutate(businessName.trim());
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="business-name">{t("common.name")}</Label>
+              <Input
+                id="business-name"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                placeholder="My Business"
+                required
+              />
+            </div>
+            <Button type="submit" variant="premium" disabled={saveName.isPending}>
+              {saveName.isPending ? <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {saveName.isPending ? t("settings.saving") : t("settings.saveChanges")}
+            </Button>
+          </form>
         </section>
 
         <section className="surface-card rounded-xl p-6">
-          <h2 className="font-display text-2xl">Business logo</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            PNG, JPEG, WebP or SVG · up to 2 MB. Stored privately and served through short-lived
-            signed links.
+          <h2 className="font-display text-xl">{t("settings.businessLogo")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground max-w-xl">
+            {t("settings.businessLogoDesc")}
           </p>
 
           <div className="mt-6 flex items-center gap-5">
@@ -215,38 +205,46 @@ function SettingsPage() {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              <input
-                ref={fileRef}
-                id="logo-file"
-                type="file"
-                className="sr-only"
-                accept={LOGO_MIME.join(",")}
-                onChange={(e) => handleFile(e.target.files?.[0])}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => fileRef.current?.click()}
-                disabled={upload.isPending}
-              >
-                {upload.isPending ? (
-                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload aria-hidden="true" className="h-4 w-4" />
-                )}
-                {settings?.logo_path ? "Replace logo" : "Upload logo"}
-              </Button>
-              {settings?.logo_path ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => remove.mutate()}
-                  disabled={remove.isPending}
-                >
-                  <Trash2 aria-hidden="true" className="h-4 w-4" />
-                  Remove
+              {!settings?.logo_path ? (
+                <Button asChild variant="outline">
+                  <label className="cursor-pointer">
+                    <Upload aria-hidden="true" className="h-4 w-4 me-2" />
+                    {t("settings.uploadLogo")}
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      onChange={handleLogoUpload}
+                      disabled={uploadLogoMutation.isPending}
+                    />
+                  </label>
                 </Button>
-              ) : null}
+              ) : (
+                <div className="flex flex-wrap items-center gap-4">
+                  <Button asChild variant="outline">
+                    <label className="cursor-pointer">
+                      <Upload aria-hidden="true" className="h-4 w-4 me-2" />
+                      {t("settings.replaceLogo")}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        onChange={handleLogoUpload}
+                        disabled={uploadLogoMutation.isPending}
+                      />
+                    </label>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => removeLogoMutation.mutate()}
+                    disabled={removeLogoMutation.isPending}
+                  >
+                    {t("settings.remove")}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -257,43 +255,46 @@ function SettingsPage() {
           ) : null}
         </section>
 
-        <section className="surface-card rounded-xl p-6 lg:col-span-2">
-          <h2 className="font-display text-2xl">Push Notifications</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Get notified when managers create new receipts.
+        <section className="surface-card rounded-xl p-6">
+          <h2 className="font-display text-xl">{t("settings.pushNotifications")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("settings.pushNotificationsDesc")}
           </p>
 
-          <div className="mt-6 flex items-center justify-between">
-            <div>
-              <p className="font-medium text-ink-foreground">
-                {isSupported ? (
-                  isSubscribed ? "You are subscribed to notifications" : "Notifications are disabled"
-                ) : (
-                  "Push notifications are not supported in this browser"
-                )}
-              </p>
-              {isSupported && permission === "denied" && (
-                <p className="text-sm text-destructive mt-1">
-                  You have blocked notifications in your browser settings.
-                </p>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
+            <div className="flex items-center gap-3">
+              {isSubscribed ? (
+                <BellRing aria-hidden="true" className="h-5 w-5 text-gold" />
+              ) : (
+                <BellOff aria-hidden="true" className="h-5 w-5 text-muted-foreground" />
               )}
+              <span
+                className={`text-sm ${isSubscribed ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                {!isSupported
+                  ? t("settings.notSupported")
+                  : isBlocked
+                    ? t("settings.blocked")
+                    : isSubscribed
+                      ? t("settings.subscribed")
+                      : t("settings.disabled")}
+              </span>
             </div>
-            
-            {isSupported && (
+            {isSupported && !isBlocked && (
               <Button
                 variant={isSubscribed ? "outline" : "premium"}
                 onClick={isSubscribed ? unsubscribe : subscribe}
-                disabled={permission === "denied"}
+                disabled={busy}
               >
+                {busy ? <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isSubscribed ? (
                   <>
-                    <BellOff className="mr-2 h-4 w-4" />
-                    Unsubscribe
+                    <BellOff aria-hidden="true" className="h-4 w-4 me-2" />
+                    {t("settings.unsubscribe")}
                   </>
                 ) : (
                   <>
-                    <Bell className="mr-2 h-4 w-4" />
-                    Enable Notifications
+                    {t("settings.enableNotifications")} <BellRing aria-hidden="true" className="h-4 w-4 ms-2" />
                   </>
                 )}
               </Button>

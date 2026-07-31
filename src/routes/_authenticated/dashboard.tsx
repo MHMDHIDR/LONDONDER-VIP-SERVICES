@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Search, FileText, Loader2, AlertTriangle, Download, Eye } from "lucide-react";
 import { fetchReceipts } from "@/lib/api";
 import { formatDateLong, formatPence } from "@/lib/money";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function DashboardPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(PAGE_SIZE);
 
@@ -39,14 +41,14 @@ function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Receipt library"
-        title="Dashboard"
-        description="Every receipt you have generated, newest first. Records are immutable once issued."
+        eyebrow={t("dashboard.eyebrow")}
+        title={t("dashboard.title")}
+        description={t("dashboard.description")}
         actions={
           <Button asChild variant="premium" size="lg">
             <Link to="/receipts/new">
-              <Plus aria-hidden="true" className="h-4 w-4" />
-              Generate new receipt
+              <Plus aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+              {t("dashboard.generateNew")}
             </Link>
           </Button>
         }
@@ -56,13 +58,13 @@ function DashboardPage() {
         <div className="relative w-full max-w-sm">
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
             aria-label="Search receipts"
-            placeholder="Search number, customer or service"
-            className="pl-9"
+            placeholder={t("dashboard.searchPlaceholder")}
+            className="ps-9"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -71,8 +73,8 @@ function DashboardPage() {
           />
         </div>
         <p aria-live="polite" className="text-sm text-muted-foreground">
-          {isPending ? "Loading receipts…" : `${total} receipt${total === 1 ? "" : "s"}`}
-          {isFetching && !isPending ? " · updating" : ""}
+          {isPending ? t("dashboard.loadingReceipts") : `${total} ${total === 1 ? t("dashboard.receiptCount") : t("dashboard.receiptsCount")}`}
+          {isFetching && !isPending ? t("dashboard.updating") : ""}
         </p>
       </div>
 
@@ -95,9 +97,9 @@ function DashboardPage() {
             <span className="gold-rule flex h-16 w-16 items-center justify-center rounded-full text-gold-foreground transition-transform group-hover:scale-105">
               <Plus aria-hidden="true" className="h-8 w-8" />
             </span>
-            <span className="font-display text-xl">Generate new receipt</span>
+            <span className="font-display text-xl">{t("dashboard.generateNew")}</span>
             <span className="text-xs text-muted-foreground">
-              Prefilled with today's date and current service pricing
+              {t("dashboard.generateNewDesc")}
             </span>
           </Link>
         </li>
@@ -115,7 +117,7 @@ function DashboardPage() {
                     <div>
                       <p className="text-eyebrow">{receipt.receipt_number}</p>
                       <h2 className="mt-1 font-display text-xl leading-tight">
-                        {receipt.customer_name || "No customer"}
+                        {receipt.customer_name || t("dashboard.noCustomer")}
                       </h2>
                     </div>
                     <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2.5 py-1 text-[0.65rem] uppercase tracking-wider text-gold-foreground">
@@ -124,16 +126,16 @@ function DashboardPage() {
                   </div>
 
                   <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-                    {receipt.service_name_snapshot || "Custom line items"}
+                    {receipt.service_name_snapshot || t("dashboard.customLineItems")}
                   </p>
 
                   <dl className="mt-auto space-y-1 pt-4 text-sm">
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Date</dt>
+                      <dt className="text-muted-foreground">{t("dashboard.date")}</dt>
                       <dd>{formatDateLong(receipt.issue_date)}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">Total</dt>
+                      <dt className="text-muted-foreground">{t("dashboard.total")}</dt>
                       <dd className="font-display text-lg">{formatPence(receipt.total_pence)}</dd>
                     </div>
                   </dl>
@@ -141,14 +143,14 @@ function DashboardPage() {
                   <div className="mt-4 flex gap-2 border-t border-border pt-4">
                     <Button asChild size="sm" variant="outline" className="flex-1">
                       <Link to="/receipts/$id" params={{ id: receipt.id }}>
-                        <Eye aria-hidden="true" className="h-4 w-4" />
-                        View
+                        <Eye aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+                        {t("dashboard.view")}
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="secondary" className="flex-1">
                       <Link to="/receipts/$id" params={{ id: receipt.id }} search={{ download: true }}>
-                        <Download aria-hidden="true" className="h-4 w-4" />
-                        PDF
+                        <Download aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+                        {t("dashboard.pdf")}
                       </Link>
                     </Button>
                   </div>
@@ -161,12 +163,12 @@ function DashboardPage() {
         <div className="surface-card mt-6 rounded-xl p-10 text-center">
           <FileText aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
           <h2 className="mt-4 font-display text-2xl">
-            {search ? "No receipts match that search" : "No receipts yet"}
+            {search ? t("dashboard.noReceiptsSearch") : t("dashboard.noReceipts")}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             {search
-              ? "Try a different receipt number, customer name or service."
-              : "Generate your first receipt to start building your library."}
+              ? t("dashboard.noReceiptsSearchDesc")
+              : t("dashboard.noReceiptsDesc")}
           </p>
         </div>
       ) : null}
@@ -175,7 +177,7 @@ function DashboardPage() {
         <div className="mt-8 flex justify-center">
           <Button variant="outline" onClick={() => setLimit((v) => v + PAGE_SIZE)} disabled={isFetching}>
             {isFetching ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-            Load more ({total - rows.length} remaining)
+            {t("dashboard.loadMore", { count: total - rows.length })}
           </Button>
         </div>
       ) : null}

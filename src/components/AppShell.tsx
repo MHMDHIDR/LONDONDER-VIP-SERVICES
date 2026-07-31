@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 
 import { useTranslation } from "react-i18next";
 
-const NAV_KEYS = [
-  { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutGrid },
-  { to: "/services", labelKey: "nav.services", icon: Sparkles },
-  { to: "/managers", labelKey: "nav.managers", icon: Users },
-  { to: "/settings", labelKey: "nav.settings", icon: Settings },
-] as const;
-
 import { type Profile } from "@/lib/api";
 
 export function AppShell({ children, profile }: { children: ReactNode, profile?: Profile | null }) {
@@ -22,6 +15,13 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const NAV_ITEMS = [
+    { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutGrid },
+    { label: t("nav.services"), to: "/services", icon: Sparkles },
+    ...(profile?.is_admin ? [{ label: t("nav.managers"), to: "/managers", icon: Users }] : []),
+    { label: t("nav.settings"), to: "/settings", icon: Settings },
+  ] as const;
 
   const { data: settings } = useQuery({
     queryKey: ["business-settings"],
@@ -71,14 +71,14 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
           </Link>
 
           <nav aria-label="Main" className="ms-auto hidden items-center gap-1 md:flex">
-            {NAV_KEYS.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
+            {NAV_ITEMS.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 className="rounded-md px-3 py-2 text-sm text-ink-foreground/70 transition-colors hover:bg-white/10 hover:text-ink-foreground"
                 activeProps={{ className: "bg-white/10 text-ink-foreground" }}
               >
-                {t(item.labelKey)}
+                {item.label}
               </Link>
             ))}
             <button
