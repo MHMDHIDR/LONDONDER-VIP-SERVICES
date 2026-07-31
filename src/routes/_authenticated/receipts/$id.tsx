@@ -79,17 +79,55 @@ function ReceiptPage() {
       )} issued ${formatDateLong(receipt.issue_date)}.`
     : "";
 
-  async function handleShare() {
-    if (!receipt) return;
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({ title: `Receipt ${receipt.receipt_number}`, text: shareText });
-        return;
-      } catch {
+  async function handleShare(target: "native" | "whatsapp" = "native") {
+    if (!receipt || busy) return;
+    setBusy(true);
+
+    let finalShareText = shareText;
+
+    try {
+      const blob = await buildReceiptPdf({ receipt, items, logoUrl });
+      const file = new File([blob], `${receipt.receipt_number}.pdf`, { type: "application/pdf" });
+
+      if (target === "native" && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Receipt ${receipt.receipt_number}`,
+          text: finalShareText,
+        });
+        setBusy(false);
         return;
       }
+      
+      // Fallback: Generate signed URL and append to text
+      let pdfPath = receipt.pdf_path;
+      if (!pdfPath) {
+        pdfPath = await storeReceiptPdf(receipt.id, receipt.receipt_number, blob);
+      }
+      if (pdfPath) {
+        const sUrl = await signedUrl("receipt-pdfs", pdfPath, 86400); // 24 hours
+        if (sUrl) finalShareText += `\n\n📄 View PDF: ${sUrl}`;
+      }
+    } catch (err) {
+      console.error("Share failed", err);
+    } finally {
+      setBusy(false);
     }
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener");
+
+    if (target === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(finalShareText)}`, "_blank", "noopener");
+    } else {
+      if (navigator.share) {
+         try {
+           await navigator.share({ title: `Receipt ${receipt.receipt_number}`, text: finalShareText });
+         } catch {
+           // ignored
+         }
+      } else {
+         toast.success("Link copied to clipboard (native share not supported)");
+         navigator.clipboard.writeText(finalShareText);
+      }
+    }
   }
 
   if (isPending) {
@@ -128,19 +166,13 @@ function ReceiptPage() {
             )}
             {t("receipt.downloadPdf")}
           </Button>
-          <Button variant="outline" onClick={handleShare}>
+          <Button variant="outline" className="gap-2 rounded-full px-6 text-[15px]" onClick={() => handleShare("native")} disabled={busy}>
             <Share2 aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
             {t("receipt.share")}
           </Button>
-          <Button asChild variant="outline">
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <MessageCircle aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
-              {t("receipt.whatsapp")}
-            </a>
+          <Button variant="outline" className="gap-2 rounded-full px-6 text-[15px]" onClick={() => handleShare("whatsapp")} disabled={busy}>
+            <MessageCircle aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+            WhatsApp
           </Button>
           <Button asChild variant="outline">
             <a
