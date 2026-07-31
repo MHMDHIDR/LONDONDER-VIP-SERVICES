@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -467,7 +467,15 @@ function NewReceiptPage() {
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">{t("receipt.service")}</dt>
-                <dd className="text-right">{selectedService?.name ?? "—"}</dd>
+                <dd className="text-right">
+                  {selectedService ? (
+                    <Link to="/services/$id" params={{ id: selectedService.id }} className="hover:underline">
+                      {selectedService.name}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
               </div>
               <div className="flex justify-between gap-4 border-t border-border pt-3">
                 <dt className="text-muted-foreground">{t("receipt.subtotal")}</dt>
