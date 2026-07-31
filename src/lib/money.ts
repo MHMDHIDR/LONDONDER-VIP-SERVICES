@@ -9,9 +9,19 @@ const gbpFormatter = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 2,
 });
 
-/** Format integer pence as "£1,234.56". */
+import i18n from "@/i18n/config";
+
+/** Format integer pence as "£1,234.56". In Arabic, it displays as "1234.56£". */
 export function formatPence(pence: number | null | undefined): string {
-  return gbpFormatter.format((pence ?? 0) / 100);
+  const amount = (pence ?? 0) / 100;
+  if (i18n.language === "ar") {
+    const formatted = new Intl.NumberFormat("en-GB", {
+      minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+    return `${formatted}£`;
+  }
+  return gbpFormatter.format(amount);
 }
 
 /** Plain "1234.56" for text inputs. */

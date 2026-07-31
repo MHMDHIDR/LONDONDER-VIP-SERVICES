@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,7 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/_authenticated/services")({
+export const Route = createFileRoute("/_authenticated/services/")({
   beforeLoad: ({ context }) => {
     if (!(context as any).profile?.is_admin) throw redirect({ to: "/dashboard" });
   },
@@ -191,7 +191,13 @@ function ServicesPage() {
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="font-display text-2xl">{service.name}</h2>
+                        <Link
+                          to="/services/$id"
+                          params={{ id: service.id }}
+                          className="hover:underline"
+                        >
+                          <h2 className="font-display text-2xl">{service.name}</h2>
+                        </Link>
                         {!service.active ? (
                           <span className="rounded-full bg-muted px-2.5 py-1 text-[0.65rem] uppercase tracking-wider text-muted-foreground">
                             Archived

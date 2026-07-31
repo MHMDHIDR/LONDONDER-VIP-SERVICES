@@ -162,6 +162,11 @@ export async function fetchServices(includeArchived = false): Promise<Service[]>
   return unwrap(res) ?? [];
 }
 
+export async function fetchService(id: string): Promise<Service | null> {
+  const res = await supabase.from("services").select("*").eq("id", id).single();
+  return unwrap(res) ?? null;
+}
+
 export async function fetchServicePrices(serviceIds: string[]): Promise<ServicePrice[]> {
   if (serviceIds.length === 0) return [];
   const res = await supabase

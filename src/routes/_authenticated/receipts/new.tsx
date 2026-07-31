@@ -111,7 +111,10 @@ function NewReceiptPage() {
     setServiceId(service.id);
     setPriceLoading(true);
     try {
-      const atISO = issueDate === todayLocalISO() ? new Date().toISOString() : new Date(`${issueDate}T23:59:59`).toISOString();
+      const atISO =
+        issueDate === todayLocalISO()
+          ? new Date().toISOString()
+          : new Date(`${issueDate}T23:59:59`).toISOString();
       const pence = await resolvePriceAt(service.id, atISO);
       if (pence === null) {
         toast.warning("No price found for that date", {
@@ -298,8 +301,19 @@ function NewReceiptPage() {
                   id="pa-order-id"
                   value={paOrderId}
                   maxLength={160}
-                  onChange={(e) => setPaOrderId(e.target.value)}
+                  onChange={(e) => setPaOrderId(e.target.value.replace(/\D/g, ""))}
+                  onKeyDown={(e) => {
+                    if (!/[\d\b]/.test(e.key) && 
+                        e.key !== "Backspace" && 
+                        e.key !== "ArrowLeft" && 
+                        e.key !== "ArrowRight" && 
+                        e.key !== "Tab" && 
+                        e.key !== "Delete") {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder={t("receipt.paOrderPlaceholder")}
+                  required
                 />
               </div>
             </div>
@@ -324,7 +338,9 @@ function NewReceiptPage() {
                 <li key={item.key} className="rounded-lg border border-border p-4">
                   <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_6rem_8rem]">
                     <div className="space-y-2">
-                      <Label htmlFor={`item-name-${item.key}`}>{t("receipt.item")} {index + 1}</Label>
+                      <Label htmlFor={`item-name-${item.key}`}>
+                        {t("receipt.item")} {index + 1}
+                      </Label>
                       <Input
                         id={`item-name-${item.key}`}
                         value={item.name}
