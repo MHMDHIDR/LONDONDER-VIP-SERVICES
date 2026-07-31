@@ -196,19 +196,27 @@ export async function fetchReceipts(opts: {
   return { rows: data ?? [], total: count ?? 0 };
 }
 
-export async function fetchReceipt(id: string) {
-  const receipt = unwrap(await supabase.from("receipts").select("*").eq("id", id).maybeSingle());
+export async function fetchReceipt(id: string): Promise<{
+  receipt: Receipt;
+  items: ReceiptItem[];
+  attachments: ReceiptAttachment[];
+} | null> {
+  const receipt = unwrap(
+    await supabase.from("receipts").select("*").eq("id", id).maybeSingle(),
+  ) as Receipt | null;
   if (!receipt) return null;
   const items =
-    unwrap(
+    (unwrap(
       await supabase
         .from("receipt_items")
         .select("*")
         .eq("receipt_id", id)
         .order("position", { ascending: true }),
-    ) ?? [];
+    ) as ReceiptItem[] | null) ?? [];
   const attachments =
-    unwrap(await supabase.from("receipt_attachments").select("*").eq("receipt_id", id)) ?? [];
+    (unwrap(
+      await supabase.from("receipt_attachments").select("*").eq("receipt_id", id),
+    ) as ReceiptAttachment[] | null) ?? [];
   return { receipt, items, attachments };
 }
 
