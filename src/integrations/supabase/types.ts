@@ -252,6 +252,7 @@ export type Database = {
           created_at: string
           currency: string
           customer_email: string | null
+          deleted_at: string | null
           customer_name: string | null
           id: string
           issue_date: string
@@ -273,6 +274,7 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_email?: string | null
+          deleted_at?: string | null
           customer_name?: string | null
           id?: string
           issue_date?: string
@@ -294,6 +296,7 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_email?: string | null
+          deleted_at?: string | null
           customer_name?: string | null
           id?: string
           issue_date?: string

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2 } from "lucide-react";
-import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt } from "@/lib/api";
+import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt, LOGO_BUCKET } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
