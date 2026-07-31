@@ -157,12 +157,12 @@ function ReceiptPage() {
 
       <article className="mx-auto w-full max-w-3xl rounded-xl border border-border bg-card p-8 shadow-(--shadow-soft) sm:p-12">
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-gold/40 pb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-start gap-4">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={`${receipt.business_name_snapshot} logo`}
-                className="h-14 w-14 object-contain"
+                className="h-20 w-auto object-contain"
               />
             ) : null}
             <div>
