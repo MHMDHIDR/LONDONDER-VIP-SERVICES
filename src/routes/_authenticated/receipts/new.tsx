@@ -111,7 +111,8 @@ function NewReceiptPage() {
     setServiceId(service.id);
     setPriceLoading(true);
     try {
-      const pence = await resolvePriceAt(service.id, new Date(`${issueDate}T12:00:00`).toISOString());
+      const atISO = issueDate === todayLocalISO() ? new Date().toISOString() : new Date(`${issueDate}T23:59:59`).toISOString();
+      const pence = await resolvePriceAt(service.id, atISO);
       if (pence === null) {
         toast.warning("No price found for that date", {
           description: "Enter the unit price manually for this receipt.",

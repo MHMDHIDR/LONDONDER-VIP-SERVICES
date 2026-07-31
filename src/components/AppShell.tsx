@@ -109,20 +109,18 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
 
         {open ? (
           <nav aria-label="Mobile" className="border-t border-white/10 bg-ink px-4 pb-4 md:hidden">
-            {NAV_KEYS.filter((item) => profile?.is_admin || item.to === "/dashboard").map(
-              (item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-ink-foreground/80 hover:bg-white/10"
-                  activeProps={{ className: "bg-white/10 text-ink-foreground" }}
-                >
-                  <item.icon aria-hidden="true" className="h-4 w-4" />
-                  {t(item.labelKey)}
-                </Link>
-              ),
-            )}
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-md px-3 py-3 text-sm text-ink-foreground/80 hover:bg-white/10"
+                activeProps={{ className: "bg-white/10 text-ink-foreground" }}
+              >
+                <item.icon aria-hidden="true" className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
             <button
               type="button"
               onClick={handleSignOut}

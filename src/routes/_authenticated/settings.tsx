@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, Building2, Bell, BellOff, Globe } from "lucide-react";
+import { Loader2, Upload, Trash2, Building2, Bell, BellOff, Globe, BellRing } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useTranslation } from "react-i18next";
 import {
@@ -50,7 +50,7 @@ function SettingsPage() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState("");
   const [fileError, setFileError] = useState<string | null>(null);
 
   const { isSupported, permission, isSubscribed, subscribe, unsubscribe } = useNotifications(true);
@@ -65,6 +65,12 @@ function SettingsPage() {
     queryFn: () => signedUrl(LOGO_BUCKET, settings?.logo_path ?? null, 3600),
     enabled: Boolean(settings?.logo_path),
   });
+
+  useEffect(() => {
+    if (settings?.business_name) {
+      setBusinessName(settings.business_name);
+    }
+  }, [settings?.business_name]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["business-settings"] });
@@ -107,7 +113,7 @@ function SettingsPage() {
     onError: (error: Error) => toast.error(t("common.error"), { description: error.message }),
   });
 
-  const currentName = name ?? settings?.business_name ?? "";
+  const currentName = businessName || settings?.business_name || "";
 
   function handleFile(file: File | undefined) {
     setFileError(null);
@@ -120,7 +126,7 @@ function SettingsPage() {
       setFileError("Logo must be 2 MB or smaller.");
       return;
     }
-    uploadLogoMutation.mutate(file);
+    upload.mutate(file);
   }
 
   return (
@@ -169,7 +175,7 @@ function SettingsPage() {
             className="mt-6 space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
-              if (businessName.trim() === profile?.business_name || saveName.isPending) return;
+              if (businessName.trim() === settings?.business_name || saveName.isPending) return;
               saveName.mutate(businessName.trim());
             }}
           >
@@ -215,8 +221,8 @@ function SettingsPage() {
                       type="file"
                       className="hidden"
                       accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                      onChange={handleLogoUpload}
-                      disabled={uploadLogoMutation.isPending}
+                      onChange={(e) => handleFile(e.target.files?.[0])}
+                      disabled={upload.isPending}
                     />
                   </label>
                 </Button>
@@ -230,16 +236,16 @@ function SettingsPage() {
                         type="file"
                         className="hidden"
                         accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                        onChange={handleLogoUpload}
-                        disabled={uploadLogoMutation.isPending}
+                        onChange={(e) => handleFile(e.target.files?.[0])}
+                        disabled={upload.isPending}
                       />
                     </label>
                   </Button>
                   <Button
                     variant="ghost"
                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => removeLogoMutation.mutate()}
-                    disabled={removeLogoMutation.isPending}
+                    onClick={() => remove.mutate()}
+                    disabled={remove.isPending}
                   >
                     {t("settings.remove")}
                   </Button>
@@ -273,20 +279,18 @@ function SettingsPage() {
               >
                 {!isSupported
                   ? t("settings.notSupported")
-                  : isBlocked
+                  : permission === "denied"
                     ? t("settings.blocked")
                     : isSubscribed
                       ? t("settings.subscribed")
                       : t("settings.disabled")}
               </span>
             </div>
-            {isSupported && !isBlocked && (
+            {isSupported && permission !== "denied" && (
               <Button
                 variant={isSubscribed ? "outline" : "premium"}
                 onClick={isSubscribed ? unsubscribe : subscribe}
-                disabled={busy}
               >
-                {busy ? <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isSubscribed ? (
                   <>
                     <BellOff aria-hidden="true" className="h-4 w-4 me-2" />

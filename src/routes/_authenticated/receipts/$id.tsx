@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/receipts/$id")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    download: search.download === true || search.download === "true",
+  validateSearch: (search: Record<string, unknown>): { download?: boolean } => ({
+    download: search.download === true || search.download === "true" ? true : undefined,
   }),
   head: () => ({
     meta: [
@@ -155,7 +155,7 @@ function ReceiptPage() {
         </div>
       </div>
 
-      <article className="mx-auto w-full max-w-3xl rounded-xl border border-border bg-card p-8 shadow-[var(--shadow-soft)] sm:p-12">
+      <article className="mx-auto w-full max-w-3xl rounded-xl border border-border bg-card p-8 shadow-(--shadow-soft) sm:p-12">
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-gold/40 pb-6">
           <div className="flex items-center gap-4">
             {logoUrl ? (
@@ -188,9 +188,13 @@ function ReceiptPage() {
           </div>
           <div className="sm:text-end">
             <p className="text-eyebrow">{t("receipt.service")}</p>
-            <p className="mt-1 font-medium">{receipt.service_name_snapshot || t("receipt.custom")}</p>
+            <p className="mt-1 font-medium">
+              {receipt.service_name_snapshot || t("receipt.custom")}
+            </p>
             {receipt.pa_order_id ? (
-              <p className="text-sm text-muted-foreground mt-1">{t("receipt.paOrder")}: {receipt.pa_order_id}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t("receipt.paOrder")}: {receipt.pa_order_id}
+              </p>
             ) : null}
           </div>
         </section>
@@ -246,7 +250,9 @@ function ReceiptPage() {
         {receipt.notes ? (
           <section className="mt-8 border-t border-border pt-4">
             <p className="text-eyebrow">{t("receipt.notes")}</p>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{receipt.notes}</p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+              {receipt.notes}
+            </p>
           </section>
         ) : null}
       </article>

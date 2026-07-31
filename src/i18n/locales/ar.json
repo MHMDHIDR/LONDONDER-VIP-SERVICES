@@ -16,7 +16,7 @@
     "description": "الوصف"
   },
   "nav": {
-    "dashboard": "لوحة القيادة",
+    "dashboard": "لوحة التحكم",
     "services": "الخدمات",
     "managers": "المدراء",
     "settings": "الإعدادات"
@@ -39,7 +39,7 @@
     "brandName": "الإيصالات التوليدية"
   },
   "dashboard": {
-    "title": "لوحة القيادة",
+    "title": "لوحة التحكم",
     "welcome": "مرحباً بعودتك",
     "recentReceipts": "الإيصالات الحديثة",
     "eyebrow": "مكتبة الإيصالات",
@@ -73,12 +73,12 @@
     "description": "الوصف",
     "summary": "الملخص",
     "client": "العميل",
-    "generateReceipt": "إنشاء الإيصال",
+    "generateReceipt": "إنشاء فاتورة/إيصال",
     "total": "الإجمالي",
     "downloadPdf": "تحميل PDF",
     "receiptNotAvailable": "الإيصال غير متاح",
     "receiptNotYours": "هذا الإيصال غير موجود أو ليس ملكك.",
-    "backToDashboard": "العودة إلى لوحة القيادة",
+    "backToDashboard": "العودة إلى لوحة التحكم",
     "share": "مشاركة",
     "whatsapp": "واتساب",
     "email": "البريد الإلكتروني",

@@ -208,3 +208,14 @@
     padding: 0 !important;
   }
 }
+
+button,
+a,
+[role="button"],
+select,
+input[type="file"],
+input[type="checkbox"],
+input[type="radio"],
+summary {
+  cursor: pointer;
+}
