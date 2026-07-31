@@ -1,0 +1,34 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "services": "Services",
+    "managers": "Managers",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "recentReceipts": "Recent Receipts"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your business profile and preferences.",
+    "languageAndRegion": "Language & Region",
+    "language": "Language",
+    "languageDescription": "Choose your preferred language for the interface.",
+    "english": "English",
+    "arabic": "Arabic (العربية)",
+    "saving": "Saving..."
+  }
+}

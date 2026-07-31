@@ -1,0 +1,34 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "نجاح",
+    "signOut": "تسجيل الخروج"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "services": "الخدمات",
+    "managers": "المدراء",
+    "settings": "الإعدادات"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك",
+    "recentReceipts": "الإيصالات الحديثة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "description": "إدارة ملفك الشخصي وتفضيلاتك.",
+    "languageAndRegion": "اللغة والمنطقة",
+    "language": "اللغة",
+    "languageDescription": "اختر لغتك المفضلة للواجهة.",
+    "english": "الإنجليزية (English)",
+    "arabic": "العربية",
+    "saving": "جاري الحفظ..."
+  }
+}

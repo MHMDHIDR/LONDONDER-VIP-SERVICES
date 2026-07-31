@@ -26,7 +26,7 @@ CREATE TRIGGER profiles_updated_at BEFORE UPDATE ON public.profiles
 CREATE TABLE public.business_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
-  business_name TEXT NOT NULL DEFAULT 'My Business',
+  business_name TEXT NOT NULL DEFAULT 'London VIP Services',
   logo_path TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -255,7 +255,7 @@ BEGIN
     NULLIF(btrim(COALESCE(_customer_email,'')), ''),
     NULLIF(btrim(COALESCE(_notes,'')), ''),
     _service_id, _svc_name,
-    COALESCE(_biz.business_name, 'My Business'), _biz.logo_path
+    COALESCE(_biz.business_name, 'London VIP Services'), _biz.logo_path
   ) RETURNING id INTO _receipt_id;
 
   FOR _item IN SELECT * FROM jsonb_array_elements(_items) LOOP
@@ -293,7 +293,7 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO public.business_settings (user_id, business_name)
-  VALUES (NEW.id, COALESCE(NULLIF(NEW.raw_user_meta_data->>'business_name',''), 'My Business'))
+  VALUES (NEW.id, COALESCE(NULLIF(NEW.raw_user_meta_data->>'business_name',''), 'London VIP Services'))
   ON CONFLICT (user_id) DO NOTHING;
 
   INSERT INTO public.services (user_id, name, description)

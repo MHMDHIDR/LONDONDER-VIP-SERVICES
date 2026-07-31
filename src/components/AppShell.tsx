@@ -6,16 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchBusinessSettings, signedUrl, LOGO_BUCKET } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { to: "/services", label: "Services", icon: Sparkles },
-  { to: "/managers", label: "Managers", icon: Users },
-  { to: "/settings", label: "Settings", icon: Settings },
+import { useTranslation } from "react-i18next";
+
+const NAV_KEYS = [
+  { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutGrid },
+  { to: "/services", labelKey: "nav.services", icon: Sparkles },
+  { to: "/managers", labelKey: "nav.managers", icon: Users },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;
 
 import { type Profile } from "@/lib/api";
 
 export function AppShell({ children, profile }: { children: ReactNode, profile?: Profile | null }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -67,30 +70,30 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
             </span>
           </Link>
 
-          <nav aria-label="Main" className="ml-auto hidden items-center gap-1 md:flex">
-            {NAV.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
+          <nav aria-label="Main" className="ms-auto hidden items-center gap-1 md:flex">
+            {NAV_KEYS.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 className="rounded-md px-3 py-2 text-sm text-ink-foreground/70 transition-colors hover:bg-white/10 hover:text-ink-foreground"
                 activeProps={{ className: "bg-white/10 text-ink-foreground" }}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
             <button
               type="button"
               onClick={handleSignOut}
-              className="ml-2 inline-flex items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-sm text-ink-foreground/80 transition-colors hover:bg-white/10 hover:text-ink-foreground"
+              className="ms-2 inline-flex items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-sm text-ink-foreground/80 transition-colors hover:bg-white/10 hover:text-ink-foreground"
             >
               <LogOut aria-hidden="true" className="h-4 w-4" />
-              Sign out
+              {t("common.signOut")}
             </button>
           </nav>
 
           <button
             type="button"
-            className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 md:hidden"
+            className="ms-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 md:hidden"
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
@@ -102,7 +105,7 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
 
         {open ? (
           <nav aria-label="Mobile" className="border-t border-white/10 bg-ink px-4 pb-4 md:hidden">
-            {NAV.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
+            {NAV_KEYS.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -111,16 +114,16 @@ export function AppShell({ children, profile }: { children: ReactNode, profile?:
                 activeProps={{ className: "bg-white/10 text-ink-foreground" }}
               >
                 <item.icon aria-hidden="true" className="h-4 w-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm text-ink-foreground/80 hover:bg-white/10"
+              className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-start text-sm text-ink-foreground/80 hover:bg-white/10"
             >
               <LogOut aria-hidden="true" className="h-4 w-4" />
-              Sign out
+              {t("common.signOut")}
             </button>
           </nav>
         ) : null}

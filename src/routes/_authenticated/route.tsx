@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -18,6 +20,14 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: () => {
     const { profile } = Route.useRouteContext();
+    const { i18n } = useTranslation();
+
+    useEffect(() => {
+      if (profile?.preferred_locale && i18n.language !== profile.preferred_locale) {
+        i18n.changeLanguage(profile.preferred_locale);
+      }
+    }, [profile?.preferred_locale, i18n]);
+
     return (
       <AppShell profile={profile}>
         <Outlet />

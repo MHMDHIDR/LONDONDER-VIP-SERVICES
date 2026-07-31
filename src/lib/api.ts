@@ -38,6 +38,17 @@ export async function fetchProfile(): Promise<Profile | null> {
   return res.data as Profile | null;
 }
 
+export async function updateLocale(locale: string) {
+  const userId = await requireUserId();
+  const res = await supabase
+    .from("profiles")
+    .update({ preferred_locale: locale })
+    .eq("id", userId)
+    .select("*")
+    .single();
+  return unwrap(res);
+}
+
 /* ------------------------------- settings -------------------------------- */
 
 export async function fetchBusinessSettings(): Promise<BusinessSettings | null> {
@@ -51,7 +62,7 @@ export async function fetchBusinessSettings(): Promise<BusinessSettings | null> 
   if (res.data) return res.data;
   const created = await supabase
     .from("business_settings")
-    .insert({ user_id: userId, business_name: "My Business" })
+    .insert({ user_id: userId, business_name: "London VIP Services" })
     .select("*")
     .single();
   return unwrap(created);
@@ -224,9 +235,8 @@ export async function fetchReceipt(id: string): Promise<{
         .order("position", { ascending: true }),
     ) as ReceiptItem[] | null) ?? [];
   const attachments =
-    (unwrap(
-      await supabase.from("receipt_attachments").select("*").eq("receipt_id", id),
-    ) as ReceiptAttachment[] | null) ?? [];
+    (unwrap(await supabase.from("receipt_attachments").select("*").eq("receipt_id", id)) as
+      ReceiptAttachment[] | null) ?? [];
   return { receipt, items, attachments };
 }
 

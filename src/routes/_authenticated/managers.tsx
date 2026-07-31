@@ -16,7 +16,7 @@ const createUserFn = createServerFn({ method: "POST" })
       email: z.string().email(),
       password: z.string().min(8),
       fullName: z.string().min(2),
-    })
+    }),
   )
   .handler(async ({ data }) => {
     // Import the admin client inside the server function
@@ -100,7 +100,8 @@ function ManagersPage() {
             <h2 className="font-display text-2xl">Add Manager</h2>
           </div>
           <p className="mb-6 text-sm text-muted-foreground">
-            Create a new account. The new manager will automatically have sample services generated for them when their account is created.
+            Create a new account. The new manager will automatically have sample services generated
+            for them when their account is created.
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -110,7 +111,7 @@ function ManagersPage() {
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Jane Doe"
+                placeholder="Manage Name"
                 required
               />
             </div>
@@ -159,8 +160,8 @@ function ManagersPage() {
           <ShieldCheck className="h-12 w-12 text-gold mb-4" />
           <h3 className="font-display text-xl mb-2">Secure Isolation</h3>
           <p className="text-sm text-ink-foreground/70 max-w-sm">
-            Each manager's data is isolated. They can only see receipts and services that they create. 
-            Sample services are automatically provisioned upon account creation.
+            Each manager's data is isolated. They can only see receipts and services that they
+            create. Sample services are automatically provisioned upon account creation.
           </p>
         </section>
       </div>

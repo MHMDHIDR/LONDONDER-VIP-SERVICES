@@ -2,23 +2,33 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, Building2, Bell, BellOff } from "lucide-react";
+import { Loader2, Upload, Trash2, Building2, Bell, BellOff, Globe } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useTranslation } from "react-i18next";
 import {
   fetchBusinessSettings,
   removeLogo,
   signedUrl,
   updateBusinessName,
+  updateLocale,
   uploadLogo,
   LOGO_BUCKET,
   LOGO_MIME,
   MAX_LOGO_BYTES,
 } from "@/lib/api";
+import { Route as AuthRoute } from "@/routes/_authenticated/route";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   beforeLoad: ({ context }) => {
@@ -36,6 +46,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function SettingsPage() {
+  const { profile } = AuthRoute.useRouteContext();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState<string | null>(null);
@@ -86,6 +98,15 @@ function SettingsPage() {
     onError: (error: Error) => toast.error("Could not remove logo", { description: error.message }),
   });
 
+  const changeLanguage = useMutation({
+    mutationFn: (locale: string) => updateLocale(locale),
+    onSuccess: (data) => {
+      i18n.changeLanguage(data.preferred_locale);
+      toast.success(t("common.save") + " " + t("common.success"));
+    },
+    onError: (error: Error) => toast.error(t("common.error"), { description: error.message }),
+  });
+
   const currentName = name ?? settings?.business_name ?? "";
 
   function handleFile(file: File | undefined) {
@@ -106,11 +127,38 @@ function SettingsPage() {
     <>
       <PageHeader
         eyebrow="Account"
-        title="Settings"
-        description="Branding applied to new receipts. Receipts already generated keep the name and logo captured at the time they were issued."
+        title={t("settings.title")}
+        description={t("settings.description")}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <section className="surface-card rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Globe className="h-5 w-5 text-gold" />
+            <h2 className="font-display text-2xl">{t("settings.languageAndRegion")}</h2>
+          </div>
+          <p className="mb-6 text-sm text-muted-foreground">
+            {t("settings.languageDescription")}
+          </p>
+
+          <div className="space-y-2">
+            <Label>{t("settings.language")}</Label>
+            <Select
+              value={profile?.preferred_locale || "en"}
+              onValueChange={(val) => changeLanguage.mutate(val)}
+              disabled={changeLanguage.isPending}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("settings.language")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">{t("settings.english")}</SelectItem>
+                <SelectItem value="ar">{t("settings.arabic")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </section>
+
         <section className="surface-card rounded-xl p-6">
           <h2 className="font-display text-2xl">Business name</h2>
           <p className="mt-1 text-sm text-muted-foreground">
