@@ -22,7 +22,7 @@ import {
   todayLocalISO,
 } from "@/lib/money";
 import { PageHeader } from "@/components/AppShell";
-import { CreateServiceDialog } from "@/routes/_authenticated/services";
+import { CreateServiceDialog } from "@/components/CreateServiceDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
