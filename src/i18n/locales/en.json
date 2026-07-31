@@ -75,7 +75,20 @@
     "archive": "Archive",
     "changePrice": "Change price",
     "editDetails": "Edit details",
-    "ongoing": "ongoing"
+    "ongoing": "ongoing",
+    "addNewService": "Add new service",
+    "addNewServiceDesc": "The price you set starts a new effective period from the date chosen.",
+    "serviceName": "Service name",
+    "priceGbp": "Price (GBP)",
+    "effectiveFrom": "Effective from",
+    "createService": "Create service",
+    "editService": "Edit service",
+    "editServiceDesc": "Details apply to future receipts only. Use “Change price” to adjust pricing.",
+    "newPrice": "New price (GBP)",
+    "changePriceTitle": "Change price",
+    "changePriceDesc": "A new price period starts on the chosen date. Existing receipts are never altered. A future date schedules the price in advance.",
+    "savePrice": "Save price",
+    "enterValidPrice": "Enter a valid price, e.g. 185.00"
   },
   "managers": {
     "title": "Managers",
@@ -86,7 +99,16 @@
     "secureIsolation": "Secure Isolation",
     "secureIsolationDescription": "Each manager's data is isolated. They can only see receipts and services that they create. Sample services are automatically provisioned upon account creation.",
     "createManager": "Create Manager",
-    "initialPassword": "Initial Password"
+    "initialPassword": "Initial Password",
+    "existingManagers": "Existing Managers",
+    "manage": "Manage",
+    "editManager": "Edit Manager",
+    "deleteManager": "Delete Manager",
+    "deleteConfirm": "Are you sure? This will delete the manager.",
+    "updateDetails": "Update details",
+    "managerNotFound": "Manager not found",
+    "saveChanges": "Save changes",
+    "deleteWarning": "This will permanently remove their access."
   },
   "settings": {
     "title": "Settings",

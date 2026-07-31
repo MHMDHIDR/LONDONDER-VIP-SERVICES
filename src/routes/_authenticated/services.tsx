@@ -122,7 +122,8 @@ function ServicesPage() {
       toast.success(service.active ? "Service archived" : "Service restored");
       invalidate();
     },
-    onError: (error: Error) => toast.error("Could not update service", { description: error.message }),
+    onError: (error: Error) =>
+      toast.error("Could not update service", { description: error.message }),
   });
 
   return (
@@ -143,7 +144,7 @@ function ServicesPage() {
         <div className="relative w-full max-w-sm">
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute inset-s-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -258,7 +259,8 @@ function ServicesPage() {
                               <span className="font-medium">{formatPence(price.amount_pence)}</span>
                             </span>
                             <span className="text-muted-foreground">
-                              {dateTimeLabel(price.valid_from, t("services.ongoing"))} &rarr; {dateTimeLabel(price.valid_to, t("services.ongoing"))}
+                              {dateTimeLabel(price.valid_from, t("services.ongoing"))} &rarr;{" "}
+                              {dateTimeLabel(price.valid_to, t("services.ongoing"))}
                             </span>
                           </li>
                         );
@@ -281,8 +283,8 @@ function ServicesPage() {
         service={pricing}
         currentPence={
           pricing
-            ? (pricesByService.get(pricing.id) ?? []).find((p) => bucketOf(p) === "current")
-                ?.amount_pence ?? null
+            ? ((pricesByService.get(pricing.id) ?? []).find((p) => bucketOf(p) === "current")
+                ?.amount_pence ?? null)
             : null
         }
         onClose={() => setPricing(null)}
@@ -301,6 +303,7 @@ function EditServiceDialog({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [initialised, setInitialised] = useState<string | null>(null);
@@ -329,10 +332,8 @@ function EditServiceDialog({
     <Dialog open={Boolean(service)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Edit service</DialogTitle>
-          <DialogDescription>
-            Details apply to future receipts only. Use “Change price” to adjust pricing.
-          </DialogDescription>
+          <DialogTitle className="font-display text-2xl">{t("services.editService")}</DialogTitle>
+          <DialogDescription>{t("services.editServiceDesc")}</DialogDescription>
         </DialogHeader>
         <form
           className="space-y-4"
@@ -343,11 +344,11 @@ function EditServiceDialog({
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Service name</Label>
+            <Label htmlFor="edit-name">{t("services.serviceName")}</Label>
             <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Description</Label>
+            <Label htmlFor="edit-description">{t("common.description")}</Label>
             <Textarea
               id="edit-description"
               rows={3}
@@ -358,11 +359,13 @@ function EditServiceDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" variant="premium" disabled={save.isPending}>
-              {save.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-              Save
+              {save.isPending ? (
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+              ) : null}
+              {t("common.save")}
             </Button>
           </DialogFooter>
         </form>
@@ -382,6 +385,7 @@ function PriceDialog({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState("");
   const [from, setFrom] = useState(todayLocalISO());
   const [error, setError] = useState<string | null>(null);
@@ -409,11 +413,10 @@ function PriceDialog({
     <Dialog open={Boolean(service)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Change price</DialogTitle>
-          <DialogDescription>
-            A new price period starts on the chosen date. Existing receipts are never altered. A
-            future date schedules the price in advance.
-          </DialogDescription>
+          <DialogTitle className="font-display text-2xl">
+            {t("services.changePriceTitle")}
+          </DialogTitle>
+          <DialogDescription>{t("services.changePriceDesc")}</DialogDescription>
         </DialogHeader>
         <form
           className="space-y-4"
@@ -421,13 +424,13 @@ function PriceDialog({
             event.preventDefault();
             setError(null);
             const pence = parsePoundsToPence(amount);
-            if (pence === null) return setError("Enter a valid price, e.g. 199.50");
+            if (pence === null) return setError(t("services.enterValidPrice"));
             if (save.isPending) return;
             save.mutate({ pence, iso: new Date(`${from}T00:00:00`).toISOString() });
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="price-amount">New price (GBP)</Label>
+            <Label htmlFor="price-amount">{t("services.newPrice")}</Label>
             <Input
               id="price-amount"
               inputMode="decimal"
@@ -437,7 +440,7 @@ function PriceDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="price-from">Effective from</Label>
+            <Label htmlFor="price-from">{t("services.effectiveFrom")}</Label>
             <Input
               id="price-from"
               type="date"
@@ -453,11 +456,13 @@ function PriceDialog({
           ) : null}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" variant="premium" disabled={save.isPending}>
-              {save.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-              Save price
+              {save.isPending ? (
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+              ) : null}
+              {t("services.savePrice")}
             </Button>
           </DialogFooter>
         </form>

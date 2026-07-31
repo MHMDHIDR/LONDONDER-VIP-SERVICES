@@ -14,9 +14,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedManagersRouteImport } from './routes/_authenticated/managers'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedManagersIndexRouteImport } from './routes/_authenticated/managers/index'
+import { Route as AuthenticatedManagersIdRouteImport } from './routes/_authenticated/managers/$id'
 import { Route as AuthenticatedReceiptsIdRouteImport } from './routes/_authenticated/receipts/$id'
 import { Route as AuthenticatedReceiptsNewRouteImport } from './routes/_authenticated/receipts/new'
 
@@ -44,11 +45,6 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedManagersRoute = AuthenticatedManagersRouteImport.update({
-  id: '/managers',
-  path: '/managers',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -57,6 +53,17 @@ const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedManagersIndexRoute =
+  AuthenticatedManagersIndexRouteImport.update({
+    id: '/managers/',
+    path: '/managers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedManagersIdRoute = AuthenticatedManagersIdRouteImport.update({
+  id: '/managers/$id',
+  path: '/managers/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReceiptsIdRoute = AuthenticatedReceiptsIdRouteImport.update({
@@ -76,22 +83,24 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/managers': typeof AuthenticatedManagersRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/managers/$id': typeof AuthenticatedManagersIdRoute
   '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
   '/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/managers/': typeof AuthenticatedManagersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/managers': typeof AuthenticatedManagersRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/managers/$id': typeof AuthenticatedManagersIdRoute
   '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
   '/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/managers': typeof AuthenticatedManagersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,11 +109,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/managers': typeof AuthenticatedManagersRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/managers/$id': typeof AuthenticatedManagersIdRoute
   '/_authenticated/receipts/$id': typeof AuthenticatedReceiptsIdRoute
   '/_authenticated/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/_authenticated/managers/': typeof AuthenticatedManagersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,22 +123,24 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/dashboard'
-    | '/managers'
     | '/services'
     | '/settings'
+    | '/managers/$id'
     | '/receipts/$id'
     | '/receipts/new'
+    | '/managers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
     | '/dashboard'
-    | '/managers'
     | '/services'
     | '/settings'
+    | '/managers/$id'
     | '/receipts/$id'
     | '/receipts/new'
+    | '/managers'
   id:
     | '__root__'
     | '/'
@@ -136,11 +148,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/dashboard'
-    | '/_authenticated/managers'
     | '/_authenticated/services'
     | '/_authenticated/settings'
+    | '/_authenticated/managers/$id'
     | '/_authenticated/receipts/$id'
     | '/_authenticated/receipts/new'
+    | '/_authenticated/managers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -187,13 +200,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/managers': {
-      id: '/_authenticated/managers'
-      path: '/managers'
-      fullPath: '/managers'
-      preLoaderRoute: typeof AuthenticatedManagersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/services': {
       id: '/_authenticated/services'
       path: '/services'
@@ -206,6 +212,20 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/managers/': {
+      id: '/_authenticated/managers/'
+      path: '/managers'
+      fullPath: '/managers/'
+      preLoaderRoute: typeof AuthenticatedManagersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/managers/$id': {
+      id: '/_authenticated/managers/$id'
+      path: '/managers/$id'
+      fullPath: '/managers/$id'
+      preLoaderRoute: typeof AuthenticatedManagersIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/receipts/$id': {
@@ -227,20 +247,22 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedManagersRoute: typeof AuthenticatedManagersRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedManagersIdRoute: typeof AuthenticatedManagersIdRoute
   AuthenticatedReceiptsIdRoute: typeof AuthenticatedReceiptsIdRoute
   AuthenticatedReceiptsNewRoute: typeof AuthenticatedReceiptsNewRoute
+  AuthenticatedManagersIndexRoute: typeof AuthenticatedManagersIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedManagersRoute: AuthenticatedManagersRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedManagersIdRoute: AuthenticatedManagersIdRoute,
   AuthenticatedReceiptsIdRoute: AuthenticatedReceiptsIdRoute,
   AuthenticatedReceiptsNewRoute: AuthenticatedReceiptsNewRoute,
+  AuthenticatedManagersIndexRoute: AuthenticatedManagersIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

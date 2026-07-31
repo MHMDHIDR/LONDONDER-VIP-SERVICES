@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -33,6 +34,7 @@ export function CreateServiceDialog({
   const [price, setPrice] = useState("");
   const [from, setFrom] = useState(todayLocalISO());
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const create = useMutation({
     mutationFn: (input: {
@@ -59,7 +61,7 @@ export function CreateServiceDialog({
     setError(null);
     if (name.trim().length < 2) return setError("Service name must be at least 2 characters");
     const pence = parsePoundsToPence(price);
-    if (pence === null) return setError("Enter a valid price, e.g. 185.00");
+    if (pence === null) return setError(t("services.enterValidPrice"));
     if (create.isPending) return;
     create.mutate({
       name: name.trim().slice(0, 160),
@@ -73,14 +75,14 @@ export function CreateServiceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Add new service</DialogTitle>
+          <DialogTitle className="font-display text-2xl">{t("services.addNewService")}</DialogTitle>
           <DialogDescription>
-            The price you set starts a new effective period from the date chosen.
+            {t("services.addNewServiceDesc")}
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={submit}>
           <div className="space-y-2">
-            <Label htmlFor="service-name">Service name</Label>
+            <Label htmlFor="service-name">{t("services.serviceName")}</Label>
             <Input
               id="service-name"
               value={name}
@@ -90,7 +92,7 @@ export function CreateServiceDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="service-description">Description</Label>
+            <Label htmlFor="service-description">{t("common.description")}</Label>
             <Textarea
               id="service-description"
               value={description}
@@ -102,7 +104,7 @@ export function CreateServiceDialog({
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="service-price">Price (GBP)</Label>
+              <Label htmlFor="service-price">{t("services.priceGbp")}</Label>
               <Input
                 id="service-price"
                 inputMode="decimal"
@@ -113,7 +115,7 @@ export function CreateServiceDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="service-from">Effective from</Label>
+              <Label htmlFor="service-from">{t("services.effectiveFrom")}</Label>
               <Input
                 id="service-from"
                 type="date"
@@ -130,13 +132,13 @@ export function CreateServiceDialog({
           ) : null}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" variant="premium" disabled={create.isPending}>
               {create.isPending ? (
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
               ) : null}
-              Create service
+              {t("services.createService")}
             </Button>
           </DialogFooter>
         </form>
