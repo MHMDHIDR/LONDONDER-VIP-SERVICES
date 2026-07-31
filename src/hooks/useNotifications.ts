@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 // You will need to replace this with the generated public VAPID key
-const VAPID_PUBLIC_KEY = "REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY";
+const VAPID_PUBLIC_KEY =
+  "BEVwOTTE-qQJVS1jdQcgj_H0NWnB5EFZweyM93itrEeC-qe8H1xWeC84mpcfq0kxUefZIUEuDwAxTjpXeYG0RAY";
 
 export function useNotifications(isAdmin: boolean) {
   const [isSupported, setIsSupported] = useState(false);
@@ -14,7 +15,7 @@ export function useNotifications(isAdmin: boolean) {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       setIsSupported(true);
       setPermission(Notification.permission);
-      
+
       // Register service worker if not already registered
       navigator.serviceWorker.register("/sw.js").catch((err) => {
         console.error("Service Worker registration failed:", err);
@@ -45,8 +46,11 @@ export function useNotifications(isAdmin: boolean) {
       }
 
       const registration = await navigator.serviceWorker.ready;
-      
-      if (VAPID_PUBLIC_KEY === "REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY") {
+
+      if (
+        VAPID_PUBLIC_KEY ===
+        "BEVwOTTE-qQJVS1jdQcgj_H0NWnB5EFZweyM93itrEeC-qe8H1xWeC84mpcfq0kxUefZIUEuDwAxTjpXeYG0RAY"
+      ) {
         toast.error("VAPID Public Key is not configured. Please set it in useNotifications.ts");
         return;
       }
@@ -61,14 +65,17 @@ export function useNotifications(isAdmin: boolean) {
 
       const subData = JSON.parse(JSON.stringify(subscription));
 
-      const { error } = await supabase.from("push_subscriptions").upsert({
-        user_id: userResponse.user.id,
-        is_admin: true,
-        endpoint: subData.endpoint,
-        p256dh: subData.keys.p256dh,
-        auth: subData.keys.auth,
-        user_agent: navigator.userAgent,
-      }, { onConflict: "is_admin, endpoint" });
+      const { error } = await supabase.from("push_subscriptions").upsert(
+        {
+          user_id: userResponse.user.id,
+          is_admin: true,
+          endpoint: subData.endpoint,
+          p256dh: subData.keys.p256dh,
+          auth: subData.keys.auth,
+          user_agent: navigator.userAgent,
+        },
+        { onConflict: "is_admin, endpoint" },
+      );
 
       if (error) {
         throw error;
@@ -86,20 +93,20 @@ export function useNotifications(isAdmin: boolean) {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      
+
       if (subscription) {
         await subscription.unsubscribe();
-        
+
         const { data: userResponse } = await supabase.auth.getUser();
         if (userResponse.user) {
-           await supabase
+          await supabase
             .from("push_subscriptions")
             .delete()
             .eq("user_id", userResponse.user.id)
             .eq("endpoint", subscription.endpoint);
         }
       }
-      
+
       setIsSubscribed(false);
       toast.success("Unsubscribed from notifications");
     } catch (error: any) {
@@ -120,9 +127,7 @@ export function useNotifications(isAdmin: boolean) {
 // Utility to convert Base64 URL-safe string to Uint8Array
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);

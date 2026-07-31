@@ -60,8 +60,8 @@ BEGIN
   SELECT is_admin INTO _is_admin FROM public.profiles WHERE id = _uid;
 
   -- Get business settings: Prefer the user's settings, fallback to admin settings.
-  SELECT business_name, logo_path INTO _biz 
-  FROM public.business_settings 
+  SELECT business_name, logo_path INTO _biz
+  FROM public.business_settings
   WHERE user_id = _uid
      OR user_id = (SELECT id FROM public.profiles WHERE is_admin = true LIMIT 1)
   ORDER BY (user_id = _uid) DESC
@@ -118,14 +118,14 @@ CREATE OR REPLACE FUNCTION public.set_service_price(
   _service_id UUID, _amount_pence BIGINT, _valid_from TIMESTAMPTZ
 ) RETURNS public.service_prices
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
-DECLARE 
-  _uid UUID := auth.uid(); 
+DECLARE
+  _uid UUID := auth.uid();
   _row public.service_prices;
   _is_admin BOOLEAN;
 BEGIN
   IF _uid IS NULL THEN RAISE EXCEPTION 'Not authenticated'; END IF;
   IF _amount_pence < 0 THEN RAISE EXCEPTION 'Price must be zero or greater'; END IF;
-  
+
   SELECT is_admin INTO _is_admin FROM public.profiles WHERE id = _uid;
   IF NOT _is_admin THEN RAISE EXCEPTION 'Only admins can set service prices'; END IF;
 
@@ -196,7 +196,7 @@ DECLARE
   _user_name TEXT;
 BEGIN
   SELECT is_admin, full_name INTO _is_admin, _user_name FROM public.profiles WHERE id = NEW.user_id;
-  
+
   IF NOT _is_admin THEN
     INSERT INTO public.notifications (user_id, title, message, type, link)
     VALUES (
@@ -223,9 +223,9 @@ CREATE OR REPLACE FUNCTION public.invoke_send_push()
 RETURNS trigger AS $$
 BEGIN
   PERFORM net.http_post(
-    url := 'https://REPLACE_WITH_YOUR_PROJECT_REF.supabase.co/functions/v1/send-push',
+    url := 'https://wobqskfpfvxidfhtlzrg.supabase.co/functions/v1/send-push',
     body := json_build_object('record', row_to_json(NEW))::text,
-    headers := '{"Content-Type": "application/json", "Authorization": "Bearer REPLACE_WITH_YOUR_ANON_KEY"}'::jsonb
+    headers := '{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvYnFza2ZwZnZ4aWRmaHRsenJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0OTE3NjEsImV4cCI6MjEwMTA2Nzc2MX0.ogZ8fkKXnBGVOZ_bGBgEDUH79JxtZ5T-a_mj_UORrbk"}'::jsonb
   );
   RETURN NEW;
 END;
