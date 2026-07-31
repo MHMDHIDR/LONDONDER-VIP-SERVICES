@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -31,6 +31,9 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/services")({
+  beforeLoad: ({ context }) => {
+    if (!(context as any).profile?.is_admin) throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Services — Generative Receipts" },

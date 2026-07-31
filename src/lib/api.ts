@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
+export type Profile = Tables<"profiles">;
 export type Service = Tables<"services">;
 export type ServicePrice = Tables<"service_prices">;
 export type Receipt = Tables<"receipts">;
@@ -26,6 +27,15 @@ async function requireUserId(): Promise<string> {
 function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
   return res.data as T;
+}
+
+/* ------------------------------- profile -------------------------------- */
+
+export async function fetchProfile(): Promise<Profile | null> {
+  const userId = await requireUserId();
+  const res = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  if (res.error) throw new Error(res.error.message);
+  return res.data as Profile | null;
 }
 
 /* ------------------------------- settings -------------------------------- */
@@ -232,6 +242,7 @@ export async function createReceipt(input: {
   customerName: string | null;
   customerEmail: string | null;
   notes: string | null;
+  paOrderId: string | null;
   serviceId: string | null;
   items: NewReceiptItem[];
 }): Promise<string> {
@@ -240,6 +251,7 @@ export async function createReceipt(input: {
     _customer_name: input.customerName ?? "",
     _customer_email: input.customerEmail ?? "",
     _notes: input.notes ?? "",
+    _pa_order_id: input.paOrderId ?? undefined,
     _service_id: input.serviceId as string,
     _items: input.items as unknown as never,
   });

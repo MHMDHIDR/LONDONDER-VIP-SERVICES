@@ -7,11 +7,21 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single();
+
+    return { user: data.user, profile };
   },
-  component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
-  ),
+  component: () => {
+    const { profile } = Route.useRouteContext();
+    return (
+      <AppShell profile={profile}>
+        <Outlet />
+      </AppShell>
+    );
+  },
 });

@@ -83,6 +83,7 @@ function NewReceiptPage() {
   const [issueDate, setIssueDate] = useState(todayLocalISO());
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
   const [notes, setNotes] = useState("");
@@ -162,6 +163,7 @@ function NewReceiptPage() {
         customerName: customerName.trim() || null,
         customerEmail: customerEmail.trim() || null,
         notes: notes.trim() || null,
+        paOrderId: paOrderId.trim() || null,
         serviceId,
         items: payload,
       });
@@ -285,6 +287,16 @@ function NewReceiptPage() {
                   value={customerEmail}
                   maxLength={254}
                   onChange={(e) => setCustomerEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pa-order-id">PA Order ID (optional)</Label>
+                <Input
+                  id="pa-order-id"
+                  value={paOrderId}
+                  maxLength={160}
+                  onChange={(e) => setPaOrderId(e.target.value)}
+                  placeholder="Link to specific order"
                 />
               </div>
             </div>

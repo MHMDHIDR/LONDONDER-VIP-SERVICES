@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const searchSchema = z.object({
-  mode: z.enum(["signin", "signup", "forgot"]).optional(),
+  mode: z.enum(["signin", "forgot"]).optional(),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -42,7 +42,7 @@ const credentials = z.object({
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
-  const [tab, setTab] = useState<string>(search.mode === "signup" ? "signup" : "signin");
+  const [tab, setTab] = useState<string>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -81,22 +81,6 @@ function AuthPage() {
     }
 
     setBusy(true);
-    if (tab === "signup") {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: parsed.data.email,
-        password: parsed.data.password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      setBusy(false);
-      if (signUpError) return setError(signUpError.message);
-      if (!data.session) {
-        setCheckEmail(true);
-        return;
-      }
-      toast.success("Account created");
-      navigate({ to: "/dashboard", replace: true });
-      return;
-    }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
@@ -165,7 +149,7 @@ function AuthPage() {
           ) : (
             <div className="surface-card rounded-xl p-6 sm:p-8">
               <h1 className="hidden font-display text-3xl lg:block">
-                {forgot ? "Reset password" : tab === "signup" ? "Create account" : "Sign in"}
+                {forgot ? "Reset password" : "Sign in"}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {forgot
@@ -173,16 +157,6 @@ function AuthPage() {
                   : "Your receipts, services and pricing history stay private to your account."}
               </p>
 
-              {!forgot ? (
-                <Tabs value={tab} onValueChange={setTab} className="mt-6">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="signin">Sign in</TabsTrigger>
-                    <TabsTrigger value="signup">Sign up</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="signin" />
-                  <TabsContent value="signup" />
-                </Tabs>
-              ) : null}
 
               <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-2">
@@ -215,7 +189,7 @@ function AuthPage() {
                     <Input
                       id="password"
                       type="password"
-                      autoComplete={tab === "signup" ? "new-password" : "current-password"}
+                      autoComplete="current-password"
                       required
                       minLength={8}
                       value={password}
@@ -233,7 +207,7 @@ function AuthPage() {
 
                 <Button type="submit" variant="premium" size="lg" className="w-full" disabled={busy}>
                   {busy ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-                  {forgot ? "Send reset link" : tab === "signup" ? "Create account" : "Sign in"}
+                  {forgot ? "Send reset link" : "Sign in"}
                 </Button>
 
                 {forgot ? (

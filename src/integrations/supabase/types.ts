@@ -41,12 +41,49 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          is_admin: boolean
           updated_at: string
         }
         Insert: {
@@ -54,6 +91,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          is_admin?: boolean
           updated_at?: string
         }
         Update: {
@@ -61,7 +99,44 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_admin?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          is_admin: boolean
+          p256dh: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          is_admin?: boolean
+          p256dh: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          is_admin?: boolean
+          p256dh?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -179,6 +254,7 @@ export type Database = {
           issue_date: string
           logo_path_snapshot: string | null
           notes: string | null
+          pa_order_id: string | null
           pdf_path: string | null
           receipt_number: string
           service_id: string | null
@@ -199,6 +275,7 @@ export type Database = {
           issue_date?: string
           logo_path_snapshot?: string | null
           notes?: string | null
+          pa_order_id?: string | null
           pdf_path?: string | null
           receipt_number: string
           service_id?: string | null
@@ -219,6 +296,7 @@ export type Database = {
           issue_date?: string
           logo_path_snapshot?: string | null
           notes?: string | null
+          pa_order_id?: string | null
           pdf_path?: string | null
           receipt_number?: string
           service_id?: string | null
@@ -325,6 +403,7 @@ export type Database = {
           _issue_date: string
           _items: Json
           _notes: string
+          _pa_order_id?: string
           _service_id: string
         }
         Returns: string

@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, Building2 } from "lucide-react";
+import { Loader2, Upload, Trash2, Building2, Bell, BellOff } from "lucide-react";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   fetchBusinessSettings,
   removeLogo,
@@ -20,6 +21,9 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/settings")({
+  beforeLoad: ({ context }) => {
+    if (!(context as any).profile?.is_admin) throw redirect({ to: "/dashboard" });
+  },
   head: () => ({
     meta: [
       { title: "Settings — Generative Receipts" },
@@ -36,6 +40,8 @@ function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+
+  const { isSupported, permission, isSubscribed, subscribe, unsubscribe } = useNotifications(true);
 
   const { data: settings, isPending } = useQuery({
     queryKey: ["business-settings"],
@@ -201,6 +207,50 @@ function SettingsPage() {
               {fileError}
             </p>
           ) : null}
+        </section>
+
+        <section className="surface-card rounded-xl p-6 lg:col-span-2">
+          <h2 className="font-display text-2xl">Push Notifications</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Get notified when managers create new receipts.
+          </p>
+
+          <div className="mt-6 flex items-center justify-between">
+            <div>
+              <p className="font-medium text-ink-foreground">
+                {isSupported ? (
+                  isSubscribed ? "You are subscribed to notifications" : "Notifications are disabled"
+                ) : (
+                  "Push notifications are not supported in this browser"
+                )}
+              </p>
+              {isSupported && permission === "denied" && (
+                <p className="text-sm text-destructive mt-1">
+                  You have blocked notifications in your browser settings.
+                </p>
+              )}
+            </div>
+            
+            {isSupported && (
+              <Button
+                variant={isSubscribed ? "outline" : "premium"}
+                onClick={isSubscribed ? unsubscribe : subscribe}
+                disabled={permission === "denied"}
+              >
+                {isSubscribed ? (
+                  <>
+                    <BellOff className="mr-2 h-4 w-4" />
+                    Unsubscribe
+                  </>
+                ) : (
+                  <>
+                    <Bell className="mr-2 h-4 w-4" />
+                    Enable Notifications
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </section>
       </div>
     </>

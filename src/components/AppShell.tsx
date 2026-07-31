@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutGrid, Settings, Sparkles, LogOut, Menu, X } from "lucide-react";
+import { LayoutGrid, Settings, Sparkles, LogOut, Menu, X, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchBusinessSettings, signedUrl, LOGO_BUCKET } from "@/lib/api";
@@ -9,10 +9,13 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { to: "/services", label: "Services", icon: Sparkles },
+  { to: "/managers", label: "Managers", icon: Users },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-export function AppShell({ children }: { children: ReactNode }) {
+import { type Profile } from "@/lib/api";
+
+export function AppShell({ children, profile }: { children: ReactNode, profile?: Profile | null }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -65,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <nav aria-label="Main" className="ml-auto hidden items-center gap-1 md:flex">
-            {NAV.map((item) => (
+            {NAV.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -99,7 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {open ? (
           <nav aria-label="Mobile" className="border-t border-white/10 bg-ink px-4 pb-4 md:hidden">
-            {NAV.map((item) => (
+            {NAV.filter(item => profile?.is_admin || item.to === "/dashboard").map((item) => (
               <Link
                 key={item.to}
                 to={item.to}

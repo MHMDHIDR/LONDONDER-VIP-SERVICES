@@ -187,6 +187,9 @@ function ReceiptPage() {
           <div className="sm:text-right">
             <p className="text-eyebrow">Service</p>
             <p className="mt-1 font-medium">{receipt.service_name_snapshot || "Custom"}</p>
+            {receipt.pa_order_id ? (
+              <p className="text-sm text-muted-foreground mt-1">PA Order: {receipt.pa_order_id}</p>
+            ) : null}
           </div>
         </section>
 
