@@ -143,9 +143,7 @@ function SettingsPage() {
             <Globe className="h-5 w-5 text-gold" />
             <h2 className="font-display text-xl">{t("settings.languageAndRegion")}</h2>
           </div>
-          <p className="mb-6 text-sm text-muted-foreground">
-            {t("settings.languageDescription")}
-          </p>
+          <p className="mb-6 text-sm text-muted-foreground">{t("settings.languageDescription")}</p>
 
           <div className="space-y-2">
             <Label>{t("settings.language")}</Label>
@@ -167,9 +165,7 @@ function SettingsPage() {
 
         <section className="surface-card rounded-xl p-6">
           <h2 className="font-display text-xl">{t("settings.businessName")}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("settings.businessNameDesc")}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("settings.businessNameDesc")}</p>
 
           <form
             className="mt-6 space-y-4"
@@ -185,12 +181,14 @@ function SettingsPage() {
                 id="business-name"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="My Business"
+                placeholder="Business Name"
                 required
               />
             </div>
             <Button type="submit" variant="premium" disabled={saveName.isPending}>
-              {saveName.isPending ? <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {saveName.isPending ? (
+                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
               {saveName.isPending ? t("settings.saving") : t("settings.saveChanges")}
             </Button>
           </form>
@@ -205,7 +203,11 @@ function SettingsPage() {
           <div className="mt-6 flex items-center gap-5">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
               {logoUrl ? (
-                <img src={logoUrl} alt="Current business logo" className="h-full w-full object-contain" />
+                <img
+                  src={logoUrl}
+                  alt="Current business logo"
+                  className="h-full w-full object-contain"
+                />
               ) : (
                 <Building2 aria-hidden="true" className="h-8 w-8 text-muted-foreground" />
               )}
@@ -298,7 +300,8 @@ function SettingsPage() {
                   </>
                 ) : (
                   <>
-                    {t("settings.enableNotifications")} <BellRing aria-hidden="true" className="h-4 w-4 ms-2" />
+                    {t("settings.enableNotifications")}{" "}
+                    <BellRing aria-hidden="true" className="h-4 w-4 ms-2" />
                   </>
                 )}
               </Button>
