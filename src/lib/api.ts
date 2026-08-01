@@ -363,6 +363,13 @@ export async function updateReceipt(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
+  // If items are provided, recalculate the subtotal and total
+  if (items) {
+    const subtotalPence = items.reduce((acc, item) => acc + Math.round(item.quantity * item.unit_price_pence), 0);
+    updates.subtotal_pence = subtotalPence;
+    updates.total_pence = subtotalPence; // Currently matching subtotal logic
+  }
+
   const { error } = await supabase
     .from("receipts")
     .update({ ...updates, updated_by: user.id, updated_at: new Date().toISOString() })
