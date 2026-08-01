@@ -26,7 +26,7 @@ import {
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { softDeleteReceipt } from "@/lib/api";
+import { softDeleteReceipt, restoreReceipt } from "@/lib/api";
 
 const getUserFn = createServerFn({ method: "GET" })
   .validator(z.object({ id: z.string() }))
@@ -34,10 +34,11 @@ const getUserFn = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: user, error } = await supabaseAdmin.auth.admin.getUserById(data.id);
     if (error) throw new Error(error.message);
+    const { data: profile } = await supabaseAdmin.from("profiles").select("full_name").eq("id", data.id).single();
     return {
       id: user.user.id,
       email: user.user.email,
-      full_name: user.user.user_metadata?.full_name || "Unknown",
+      full_name: profile?.full_name || user.user.user_metadata?.full_name || "Unknown",
     };
   });
 
@@ -236,11 +237,16 @@ function ManagerDetailsPage() {
                   filteredReceipts.map(r => (
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">
-                        <Link to="/receipts/$id" params={{ id: r.id }}>
-                          <Badge variant="outline" className="cursor-pointer hover:bg-muted">
-                            {r.receipt_number}
-                          </Badge>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link to="/receipts/$id" params={{ id: r.id }}>
+                            <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                              {r.receipt_number}
+                            </Badge>
+                          </Link>
+                          {r.deleted_at && (
+                            <Badge variant="destructive">Deleted</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{r.pa_order_id || "-"}</TableCell>
                       <TableCell>{r.issue_date ? format(new Date(r.issue_date), "PP") : "-"}</TableCell>
@@ -257,38 +263,73 @@ function ManagerDetailsPage() {
                               <Edit className="h-4 w-4" />
                             </Link>
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Receipt</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this receipt? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-destructive hover:bg-destructive/90 text-white"
-                                  onClick={async () => {
-                                    try {
-                                      await softDeleteReceipt(r.id, r.pdf_path);
-                                      queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
-                                      toast.success("Receipt deleted successfully");
-                                    } catch (err: any) {
-                                      toast.error("Failed to delete receipt");
-                                    }
-                                  }}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          {r.deleted_at ? (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-600 hover:bg-green-600/10">
+                                  Restore
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Restore Receipt</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to restore this receipt?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-green-600 hover:bg-green-600/90 text-white"
+                                    onClick={async () => {
+                                      try {
+                                        await restoreReceipt(r.id);
+                                        queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
+                                        toast.success("Receipt restored successfully");
+                                      } catch (err: any) {
+                                        toast.error("Failed to restore receipt");
+                                      }
+                                    }}
+                                  >
+                                    Restore
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          ) : (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Receipt</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this receipt? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-destructive hover:bg-destructive/90 text-white"
+                                    onClick={async () => {
+                                      try {
+                                        await softDeleteReceipt(r.id, r.pdf_path);
+                                        queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
+                                        toast.success("Receipt deleted successfully");
+                                      } catch (err: any) {
+                                        toast.error("Failed to delete receipt");
+                                      }
+                                    }}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

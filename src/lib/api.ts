@@ -269,7 +269,7 @@ export async function fetchReceipt(id: string): Promise<{
   attachments: ReceiptAttachment[];
 } | null> {
   const receipt = unwrap(
-    await supabase.from("receipts").select("*, creator:profiles!receipts_creator_fkey(id, full_name, email), updater:profiles!receipts_updater_fkey(id, full_name, email)").eq("id", id).is("deleted_at", null).maybeSingle(),
+    await supabase.from("receipts").select("*, creator:profiles!receipts_creator_fkey(id, full_name, email), updater:profiles!receipts_updater_fkey(id, full_name, email)").eq("id", id).maybeSingle(),
   ) as any | null;
   if (!receipt) return null;
   const items =
@@ -352,7 +352,14 @@ export async function softDeleteReceipt(receiptId: string, pdfPath?: string | nu
   }
 }
 
-export async function updateReceipt(id: string, updates: Partial<Database["public"]["Tables"]["receipts"]["Update"]>) {
+export async function restoreReceipt(id: string) { await supabase.from('receipts').update({ deleted_at: null }).eq('id', id); }
+
+
+export async function updateReceipt(
+  id: string,
+  updates: Partial<Database["public"]["Tables"]["receipts"]["Update"]>,
+  items?: NewReceiptItem[]
+) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
@@ -364,5 +371,39 @@ export async function updateReceipt(id: string, updates: Partial<Database["publi
   if (error) {
     console.error("Error updating receipt:", error);
     throw new Error(error.message);
+  }
+
+  if (items) {
+    const { error: deleteError } = await supabase
+      .from("receipt_items")
+      .delete()
+      .eq("receipt_id", id);
+
+    if (deleteError) {
+      console.error("Error deleting receipt items:", deleteError);
+      throw new Error(deleteError.message);
+    }
+
+    if (items.length > 0) {
+      const itemsToInsert = items.map((item, index) => ({
+        receipt_id: id,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price_pence: item.unit_price_pence,
+        line_total_pence: Math.round(item.quantity * item.unit_price_pence),
+        position: index,
+        user_id: user.id,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("receipt_items")
+        .insert(itemsToInsert);
+
+      if (insertError) {
+        console.error("Error inserting receipt items:", insertError);
+        throw new Error(insertError.message);
+      }
+    }
   }
 }

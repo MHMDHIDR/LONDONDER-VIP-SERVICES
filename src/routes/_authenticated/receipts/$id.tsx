@@ -281,7 +281,7 @@ function ReceiptPage() {
                   {(receipt as any).updater.full_name}
                 </Link>
               ) : (receipt as any).creator?.full_name ? (
-                <Link to="/managers/$id" params={{ id: receipt.user_id || "" }} className="hover:underline text-foreground">
+                <Link to="/managers/$id" params={{ id: receipt.updated_by || receipt.user_id || "" }} className="hover:underline text-foreground">
                   {(receipt as any).creator.full_name}
                 </Link>
               ) : (
