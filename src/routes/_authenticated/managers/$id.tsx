@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { Loader2, ArrowLeft, Trash2, KeyRound } from "lucide-react";
+import { Loader2, ArrowLeft, Trash2, KeyRound, Edit } from "lucide-react";
 import { z } from "zod";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { softDeleteReceipt } from "@/lib/api";
 
 const getUserFn = createServerFn({ method: "GET" })
   .validator(z.object({ id: z.string() }))
@@ -76,6 +89,7 @@ function ManagerDetailsPage() {
   const { tab } = Route.useSearch();
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -202,25 +216,32 @@ function ManagerDetailsPage() {
                   <TableHead>Order ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingReceipts ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 ) : filteredReceipts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                       No receipts found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredReceipts.map(r => (
                     <TableRow key={r.id}>
-                      <TableCell className="font-medium">{r.receipt_number}</TableCell>
+                      <TableCell className="font-medium">
+                        <Link to="/receipts/$id" params={{ id: r.id }}>
+                          <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                            {r.receipt_number}
+                          </Badge>
+                        </Link>
+                      </TableCell>
                       <TableCell>{r.pa_order_id || "-"}</TableCell>
                       <TableCell>{r.issue_date ? format(new Date(r.issue_date), "PP") : "-"}</TableCell>
                       <TableCell className="text-right">
@@ -228,6 +249,47 @@ function ManagerDetailsPage() {
                           style: "currency",
                           currency: r.currency || "USD",
                         })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link to="/receipts/$id/edit" params={{ id: r.id }}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Receipt</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this receipt? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive hover:bg-destructive/90 text-white"
+                                  onClick={async () => {
+                                    try {
+                                      await softDeleteReceipt(r.id, r.pdf_path);
+                                      queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
+                                      toast.success("Receipt deleted successfully");
+                                    } catch (err: any) {
+                                      toast.error("Failed to delete receipt");
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -118,7 +118,7 @@ function ManagersPage() {
     queryFn: () => listUsersFn(),
   });
 
-  const managers = managersRaw?.filter((m) => m.id !== profile?.id) || [];
+  const managers = managersRaw || [];
 
   return (
     <>

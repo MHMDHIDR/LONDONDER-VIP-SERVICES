@@ -271,15 +271,34 @@ function ReceiptPage() {
         </div>
       </div>
 
-      {receipt.updated_at && (
+      {(receipt.updated_at || receipt.created_at) && (
         <div className="mb-6 text-sm text-muted-foreground print:hidden">
-          Last updated at {formatDateLong(receipt.updated_at)} by{" "}
-          {(receipt as any).updater?.full_name ? (
-            <Link to="/managers/$id" params={{ id: receipt.updated_by || "" }} className="hover:underline text-foreground">
-              {(receipt as any).updater.full_name}
-            </Link>
+          {receipt.updated_at && receipt.created_at && receipt.updated_at !== receipt.created_at ? (
+            <>
+              Last updated at {formatDateLong(receipt.updated_at)} by{" "}
+              {(receipt as any).updater?.full_name ? (
+                <Link to="/managers/$id" params={{ id: receipt.updated_by || "" }} className="hover:underline text-foreground">
+                  {(receipt as any).updater.full_name}
+                </Link>
+              ) : (receipt as any).creator?.full_name ? (
+                <Link to="/managers/$id" params={{ id: receipt.user_id || "" }} className="hover:underline text-foreground">
+                  {(receipt as any).creator.full_name}
+                </Link>
+              ) : (
+                "Unknown"
+              )}
+            </>
           ) : (
-            "Unknown"
+            <>
+              Created at {formatDateLong(receipt.created_at || receipt.updated_at)} by{" "}
+              {(receipt as any).creator?.full_name ? (
+                <Link to="/managers/$id" params={{ id: receipt.user_id || "" }} className="hover:underline text-foreground">
+                  {(receipt as any).creator.full_name}
+                </Link>
+              ) : (
+                "Unknown"
+              )}
+            </>
           )}
         </div>
       )}
