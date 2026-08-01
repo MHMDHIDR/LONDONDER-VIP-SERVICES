@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, Database } from "@/integrations/supabase/types";
 import { createServerFn } from "@tanstack/react-start";
 
 export type Profile = Tables<"profiles">;
