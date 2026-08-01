@@ -268,6 +268,7 @@ export type Database = {
           total_pence: number
           updated_at: string
           user_id: string
+          updated_by: string | null
         }
         Insert: {
           business_name_snapshot?: string | null
@@ -290,6 +291,7 @@ export type Database = {
           total_pence?: number
           updated_at?: string
           user_id: string
+          updated_by?: string | null
         }
         Update: {
           business_name_snapshot?: string | null
@@ -312,15 +314,30 @@ export type Database = {
           total_pence?: number
           updated_at?: string
           user_id?: string
+          updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "receipts_creator_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_updater_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "receipts_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       service_prices: {

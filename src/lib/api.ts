@@ -232,7 +232,7 @@ export async function resolvePriceAt(serviceId: string, atISO: string): Promise<
 
 /* -------------------------------- receipts -------------------------------- */
 
-export type ReceiptPage = { rows: Receipt[]; total: number };
+export type ReceiptPage = { rows: any[]; total: number };
 
 export async function fetchReceipts(opts: {
   search: string;
@@ -241,7 +241,7 @@ export async function fetchReceipts(opts: {
 }): Promise<ReceiptPage> {
   let query = supabase
     .from("receipts")
-    .select("*", { count: "exact" })
+    .select("*, creator:profiles!receipts_creator_fkey(id, full_name, email), updater:profiles!receipts_updater_fkey(id, full_name, email)", { count: "exact" })
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(opts.offset, opts.offset + opts.limit - 1);
@@ -269,8 +269,8 @@ export async function fetchReceipt(id: string): Promise<{
   attachments: ReceiptAttachment[];
 } | null> {
   const receipt = unwrap(
-    await supabase.from("receipts").select("*").eq("id", id).is("deleted_at", null).maybeSingle(),
-  ) as Receipt | null;
+    await supabase.from("receipts").select("*, creator:profiles!receipts_creator_fkey(id, full_name, email), updater:profiles!receipts_updater_fkey(id, full_name, email)").eq("id", id).is("deleted_at", null).maybeSingle(),
+  ) as any | null;
   if (!receipt) return null;
   const items =
     (unwrap(
@@ -349,5 +349,20 @@ export async function softDeleteReceipt(receiptId: string, pdfPath?: string | nu
   if (error) throw new Error(error.message);
   if (pdfPath) {
     await supabase.storage.from(PDF_BUCKET).remove([pdfPath]);
+  }
+}
+
+export async function updateReceipt(id: string, updates: Partial<Database["public"]["Tables"]["receipts"]["Update"]>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("receipts")
+    .update({ ...updates, updated_by: user.id, updated_at: new Date().toISOString() })
+    .eq("id", id);
+    
+  if (error) {
+    console.error("Error updating receipt:", error);
+    throw new Error(error.message);
   }
 }
