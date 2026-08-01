@@ -112,35 +112,44 @@ function DashboardPage() {
             ))
           : rows.map((receipt) => (
               <li key={receipt.id}>
-                <article className="surface-card flex h-full min-h-[15rem] flex-col rounded-xl p-5 transition-shadow hover:shadow-[var(--shadow-lift)]">
+                <article className="surface-card flex h-full min-h-[15rem] flex-col rounded-xl p-4 transition-shadow hover:shadow-[var(--shadow-lift)]">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-eyebrow">{receipt.receipt_number}</p>
-                      <h2 className="mt-1 font-display text-xl leading-tight">
+                      <h2 className="mt-1 font-display text-lg leading-tight">
                         {receipt.customer_name || t("dashboard.noCustomer")}
                       </h2>
                     </div>
-                    <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2.5 py-1 text-[0.65rem] uppercase tracking-wider text-gold-foreground">
+                    <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2 py-0.5 text-[0.65rem] uppercase tracking-wider text-gold-foreground">
                       {receipt.status}
                     </span>
                   </div>
 
-                  <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
+                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                     {receipt.service_name_snapshot || t("dashboard.customLineItems")}
                   </p>
 
-                  <dl className="mt-auto space-y-1 pt-4 text-sm">
+                  <div className="mt-2 flex items-center gap-2">
+                    <Link to="/managers/$id" params={{ id: receipt.user_id }} className="flex items-center gap-2 hover:underline">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground uppercase">
+                        {receipt.creator?.full_name?.charAt(0) || "?"}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{receipt.creator?.full_name || "Unknown"}</span>
+                    </Link>
+                  </div>
+
+                  <dl className="mt-auto space-y-0.5 pt-3 text-sm">
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">{t("dashboard.date")}</dt>
                       <dd>{formatDateLong(receipt.issue_date)}</dd>
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">{t("dashboard.total")}</dt>
-                      <dd className="font-display text-lg">{formatPence(receipt.total_pence)}</dd>
+                      <dd className="font-display text-base">{formatPence(receipt.total_pence)}</dd>
                     </div>
                   </dl>
 
-                  <div className="mt-4 flex gap-2 border-t border-border pt-4">
+                  <div className="mt-3 flex gap-2 border-t border-border pt-3">
                     <Button asChild size="sm" variant="outline" className="flex-1">
                       <Link to="/receipts/$id" params={{ id: receipt.id }}>
                         <Eye aria-hidden="true" className="h-4 w-4 ms-0 me-2" />

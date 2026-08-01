@@ -21,6 +21,7 @@ import { Route as AuthenticatedReceiptsIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReceiptsNewRouteImport } from './routes/_authenticated/receipts/new'
 import { Route as AuthenticatedServicesIndexRouteImport } from './routes/_authenticated/services/index'
 import { Route as AuthenticatedServicesIdRouteImport } from './routes/_authenticated/services/$id'
+import { Route as AuthenticatedReceiptsIdEditRouteImport } from './routes/_authenticated/receipts/$id.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -84,6 +85,12 @@ const AuthenticatedServicesIdRoute = AuthenticatedServicesIdRouteImport.update({
   path: '/services/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReceiptsIdEditRoute =
+  AuthenticatedReceiptsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedReceiptsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,11 +99,12 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
+  '/receipts/$id': typeof AuthenticatedReceiptsIdRouteWithChildren
   '/receipts/new': typeof AuthenticatedReceiptsNewRoute
   '/services/$id': typeof AuthenticatedServicesIdRoute
   '/managers/': typeof AuthenticatedManagersIndexRoute
   '/services/': typeof AuthenticatedServicesIndexRoute
+  '/receipts/$id/edit': typeof AuthenticatedReceiptsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -105,11 +113,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
+  '/receipts/$id': typeof AuthenticatedReceiptsIdRouteWithChildren
   '/receipts/new': typeof AuthenticatedReceiptsNewRoute
   '/services/$id': typeof AuthenticatedServicesIdRoute
   '/managers': typeof AuthenticatedManagersIndexRoute
   '/services': typeof AuthenticatedServicesIndexRoute
+  '/receipts/$id/edit': typeof AuthenticatedReceiptsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -120,11 +129,12 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/_authenticated/receipts/$id': typeof AuthenticatedReceiptsIdRoute
+  '/_authenticated/receipts/$id': typeof AuthenticatedReceiptsIdRouteWithChildren
   '/_authenticated/receipts/new': typeof AuthenticatedReceiptsNewRoute
   '/_authenticated/services/$id': typeof AuthenticatedServicesIdRoute
   '/_authenticated/managers/': typeof AuthenticatedManagersIndexRoute
   '/_authenticated/services/': typeof AuthenticatedServicesIndexRoute
+  '/_authenticated/receipts/$id/edit': typeof AuthenticatedReceiptsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/services/$id'
     | '/managers/'
     | '/services/'
+    | '/receipts/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/services/$id'
     | '/managers'
     | '/services'
+    | '/receipts/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated/services/$id'
     | '/_authenticated/managers/'
     | '/_authenticated/services/'
+    | '/_authenticated/receipts/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -262,14 +275,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/receipts/$id/edit': {
+      id: '/_authenticated/receipts/$id/edit'
+      path: '/edit'
+      fullPath: '/receipts/$id/edit'
+      preLoaderRoute: typeof AuthenticatedReceiptsIdEditRouteImport
+      parentRoute: typeof AuthenticatedReceiptsIdRoute
+    }
   }
 }
+
+interface AuthenticatedReceiptsIdRouteChildren {
+  AuthenticatedReceiptsIdEditRoute: typeof AuthenticatedReceiptsIdEditRoute
+}
+
+const AuthenticatedReceiptsIdRouteChildren: AuthenticatedReceiptsIdRouteChildren =
+  {
+    AuthenticatedReceiptsIdEditRoute: AuthenticatedReceiptsIdEditRoute,
+  }
+
+const AuthenticatedReceiptsIdRouteWithChildren =
+  AuthenticatedReceiptsIdRoute._addFileChildren(
+    AuthenticatedReceiptsIdRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedManagersIdRoute: typeof AuthenticatedManagersIdRoute
-  AuthenticatedReceiptsIdRoute: typeof AuthenticatedReceiptsIdRoute
+  AuthenticatedReceiptsIdRoute: typeof AuthenticatedReceiptsIdRouteWithChildren
   AuthenticatedReceiptsNewRoute: typeof AuthenticatedReceiptsNewRoute
   AuthenticatedServicesIdRoute: typeof AuthenticatedServicesIdRoute
   AuthenticatedManagersIndexRoute: typeof AuthenticatedManagersIndexRoute
@@ -280,7 +314,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedManagersIdRoute: AuthenticatedManagersIdRoute,
-  AuthenticatedReceiptsIdRoute: AuthenticatedReceiptsIdRoute,
+  AuthenticatedReceiptsIdRoute: AuthenticatedReceiptsIdRouteWithChildren,
   AuthenticatedReceiptsNewRoute: AuthenticatedReceiptsNewRoute,
   AuthenticatedServicesIdRoute: AuthenticatedServicesIdRoute,
   AuthenticatedManagersIndexRoute: AuthenticatedManagersIndexRoute,

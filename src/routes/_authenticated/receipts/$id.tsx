@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2, Pencil } from "lucide-react";
 import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt, LOGO_BUCKET } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -238,6 +238,12 @@ function ReceiptPage() {
               {t("receipt.email")}
             </a>
           </Button>
+          <Button asChild variant="outline" className="gap-2 rounded-full px-6 text-[15px]">
+            <Link to="/receipts/$id/edit" params={{ id }}>
+              <Pencil aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
+              Edit
+            </Link>
+          </Button>
           {profile?.is_admin && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -264,6 +270,19 @@ function ReceiptPage() {
           )}
         </div>
       </div>
+
+      {receipt.updated_at && (
+        <div className="mb-6 text-sm text-muted-foreground print:hidden">
+          Last updated at {formatDateLong(receipt.updated_at)} by{" "}
+          {(receipt as any).updater?.full_name ? (
+            <Link to="/managers/$id" params={{ id: receipt.updated_by || "" }} className="hover:underline text-foreground">
+              {(receipt as any).updater.full_name}
+            </Link>
+          ) : (
+            "Unknown"
+          )}
+        </div>
+      )}
 
       <article className="mx-auto w-full max-w-3xl rounded-xl border border-border bg-card p-8 shadow-(--shadow-soft) sm:p-12">
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-gold/40 pb-6">

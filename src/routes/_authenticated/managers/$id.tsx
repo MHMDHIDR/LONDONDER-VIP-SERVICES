@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -9,6 +9,10 @@ import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 const getUserFn = createServerFn({ method: "GET" })
@@ -55,6 +59,11 @@ const deleteUserFn = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/_authenticated/managers/$id")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => {
+    return {
+      tab: typeof search.tab === "string" ? search.tab : undefined,
+    };
+  },
   beforeLoad: ({ context }) => {
     if (!(context as any).profile?.is_admin) throw redirect({ to: "/dashboard" });
   },
@@ -64,16 +73,48 @@ export const Route = createFileRoute("/_authenticated/managers/$id")({
 function ManagerDetailsPage() {
   const { t } = useTranslation();
   const { id } = Route.useParams();
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const activeTab = tab || "receipts";
 
   const { data: manager, isLoading } = useQuery({
     queryKey: ["manager", id],
     queryFn: () => getUserFn({ data: { id } }),
   });
+
+  const { data: receipts, isLoading: isLoadingReceipts } = useQuery({
+    queryKey: ["manager-receipts", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("receipts")
+        .select("*")
+        .eq("user_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filteredReceipts = receipts?.filter((r) => {
+    if (!searchQuery) return true;
+    const lowerQ = searchQuery.toLowerCase();
+    return (
+      r.receipt_number.toLowerCase().includes(lowerQ) ||
+      (r.pa_order_id && r.pa_order_id.toLowerCase().includes(lowerQ)) ||
+      (r.issue_date && r.issue_date.toLowerCase().includes(lowerQ))
+    );
+  }) || [];
+
+  const onTabChange = (val: string) => {
+    navigate({ search: { tab: val } as any, replace: true });
+  };
 
   useEffect(() => {
     if (manager?.email) {
@@ -138,89 +179,150 @@ function ManagerDetailsPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
-        <section className="surface-card rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <KeyRound className="h-5 w-5 text-gold" />
-            <h2 className="font-display text-2xl">{t("managers.updateDetails")}</h2>
+      <Tabs value={activeTab} onValueChange={onTabChange} className="w-full mt-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="receipts">Created receipts</TabsTrigger>
+          <TabsTrigger value="details">Update details</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="receipts">
+          <div className="flex items-center justify-between mb-4">
+            <Input 
+              placeholder="Search receipts..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="max-w-sm bg-surface"
+            />
           </div>
-
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setError(null);
-              if (password && password.length < 8) {
-                setError(t("auth.passwordPlaceholder"));
-                return;
-              }
-              update.mutate();
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email">{t("common.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">{t("common.password")}</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("auth.passwordPlaceholder")}
-              />
-              <p className="text-sm text-muted-foreground">
-                {t("managers.leaveBlank")}
-              </p>
-            </div>
-
-            {error ? (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            ) : null}
-
-            <Button type="submit" variant="premium" className="w-full" disabled={update.isPending}>
-              {update.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 me-2 animate-spin" /> : null}
-              {t("managers.saveChanges")}
-            </Button>
-          </form>
-        </section>
-
-        <section className="surface-card rounded-xl p-6 border-destructive/20 bg-destructive/5">
-          <div className="flex items-center gap-2 mb-4 text-destructive">
-            <Trash2 className="h-5 w-5" />
-            <h2 className="font-display text-2xl">{t("managers.deleteManager")}</h2>
+          <div className="border rounded-md bg-surface overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead>Receipt Number</TableHead>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoadingReceipts ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+                ) : filteredReceipts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      No receipts found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredReceipts.map(r => (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-medium">{r.receipt_number}</TableCell>
+                      <TableCell>{r.pa_order_id || "-"}</TableCell>
+                      <TableCell>{r.issue_date ? format(new Date(r.issue_date), "PP") : "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {(r.total_pence / 100).toLocaleString(undefined, {
+                          style: "currency",
+                          currency: r.currency || "USD",
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
-          <p className="mb-6 text-sm text-destructive/80">
-            {t("managers.deleteWarning")}
-          </p>
+        </TabsContent>
 
-          <Button
-            type="button"
-            variant="destructive"
-            className="w-full"
-            disabled={remove.isPending}
-            onClick={() => {
-              if (window.confirm(t("managers.deleteConfirm"))) {
-                remove.mutate();
-              }
-            }}
-          >
-            {remove.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 me-2 animate-spin" /> : null}
-            {t("managers.deleteManager")}
-          </Button>
-        </section>
-      </div>
+        <TabsContent value="details">
+          <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+            <section className="surface-card rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <KeyRound className="h-5 w-5 text-gold" />
+                <h2 className="font-display text-2xl">{t("managers.updateDetails")}</h2>
+              </div>
+
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setError(null);
+                  if (password && password.length < 8) {
+                    setError(t("auth.passwordPlaceholder"));
+                    return;
+                  }
+                  update.mutate();
+                }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t("common.email")}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("common.password")}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t("auth.passwordPlaceholder")}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {t("managers.leaveBlank")}
+                  </p>
+                </div>
+
+                {error ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {error}
+                  </p>
+                ) : null}
+
+                <Button type="submit" variant="premium" className="w-full" disabled={update.isPending}>
+                  {update.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 me-2 animate-spin" /> : null}
+                  {t("managers.saveChanges")}
+                </Button>
+              </form>
+            </section>
+
+            <section className="surface-card rounded-xl p-6 border-destructive/20 bg-destructive/5">
+              <div className="flex items-center gap-2 mb-4 text-destructive">
+                <Trash2 className="h-5 w-5" />
+                <h2 className="font-display text-2xl">{t("managers.deleteManager")}</h2>
+              </div>
+              <p className="mb-6 text-sm text-destructive/80">
+                {t("managers.deleteWarning")}
+              </p>
+
+              <Button
+                type="button"
+                variant="destructive"
+                className="w-full"
+                disabled={remove.isPending}
+                onClick={() => {
+                  if (window.confirm(t("managers.deleteConfirm"))) {
+                    remove.mutate();
+                  }
+                }}
+              >
+                {remove.isPending ? <Loader2 aria-hidden="true" className="h-4 w-4 me-2 animate-spin" /> : null}
+                {t("managers.deleteManager")}
+              </Button>
+            </section>
+          </div>
+        </TabsContent>
+      </Tabs>
     </>
   );
 }
