@@ -52,7 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/receipts/$id/edit")({
+export const Route = createFileRoute("/_authenticated/receipts/$id_/edit")({
   component: EditReceiptPage,
 });
 
