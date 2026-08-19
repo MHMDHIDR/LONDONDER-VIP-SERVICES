@@ -3,13 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { Loader2, ArrowLeft, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Trash2, FileText, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { fetchWorker, updateWorker, deleteWorker } from "@/lib/workers-api";
+import { fetchPayouts } from "@/lib/payouts-api";
+import { formatDateLong } from "@/lib/money";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/workers/$id")({
   beforeLoad: ({ context }) => {
@@ -32,9 +44,19 @@ function WorkerEditPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Dialog state
+  const [showConfirm1, setShowConfirm1] = useState(false);
+  const [showConfirm2, setShowConfirm2] = useState(false);
+
   const { data: worker, isLoading } = useQuery({
     queryKey: ["worker", id],
     queryFn: () => fetchWorker(id),
+  });
+
+  const { data: payoutsPage, isLoading: isLoadingPayouts } = useQuery({
+    queryKey: ["payouts", "worker", id],
+    queryFn: () => fetchPayouts({ search: "", limit: 100, offset: 0, workerId: id }),
+    enabled: !!worker,
   });
 
   useEffect(() => {
@@ -70,8 +92,7 @@ function WorkerEditPage() {
     }
   }
 
-  async function handleDelete() {
-    if (!window.confirm(t("workers.deleteConfirm"))) return;
+  async function handleDeleteConfirm() {
     setBusy(true);
     try {
       await deleteWorker({ data: id });
@@ -80,6 +101,7 @@ function WorkerEditPage() {
     } catch (err: any) {
       toast.error(err.message || "Failed to delete worker");
       setBusy(false);
+      setShowConfirm2(false);
     }
   }
 
@@ -101,6 +123,8 @@ function WorkerEditPage() {
       </div>
     );
   }
+
+  const payouts = payoutsPage?.rows || [];
 
   return (
     <>
@@ -165,23 +189,112 @@ function WorkerEditPage() {
           </form>
         </section>
 
-        <section className="surface-card rounded-xl p-6 border-destructive/20 bg-destructive/5">
-          <h2 className="font-display text-xl text-destructive mb-2">{t("workers.deleteWorker")}</h2>
-          <p className="text-sm text-destructive/80 mb-6">
-            {t("workers.deleteWarning")}
-          </p>
+        <section className="surface-card rounded-xl p-6">
+          <div className="mb-6 flex items-center gap-2">
+            <FileText className="h-5 w-5 text-gold" />
+            <h2 className="font-display text-2xl">Worker Payouts</h2>
+          </div>
+          
+          {isLoadingPayouts ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : payouts.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+              {payouts.map((payout) => (
+                <Link
+                  key={payout.id}
+                  to="/payouts/$id"
+                  params={{ id: payout.id }}
+                  className="group flex flex-col gap-1 rounded-lg border border-border bg-card p-3 transition-colors hover:border-gold/50 hover:bg-gold/5"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-foreground group-hover:text-gold transition-colors">
+                      {payout.payout_number}
+                    </p>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDateLong(payout.issue_date, "en-GB")}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No payouts found for this worker.
+            </p>
+          )}
+        </section>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="mt-16">
+        <h3 className="text-lg font-medium text-destructive mb-4">Danger Zone</h3>
+        <section className="surface-card rounded-xl p-6 border-destructive/30 bg-destructive/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h4 className="font-medium text-destructive">Delete this worker</h4>
+            <p className="text-sm text-destructive/80 mt-1 max-w-xl">
+              This action is permanent and will hide all associated payouts from the system. You will no longer be able to view or manage this worker's history.
+            </p>
+          </div>
           <Button
             type="button"
             variant="destructive"
-            className="w-full"
+            onClick={() => setShowConfirm1(true)}
             disabled={busy}
-            onClick={handleDelete}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            {t("workers.deleteWorker")}
+            Delete Worker
           </Button>
         </section>
       </div>
+
+      {/* Double Confirmation Dialogs */}
+      <AlertDialog open={showConfirm1} onOpenChange={setShowConfirm1}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark the worker as deleted. Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowConfirm1(false);
+                setTimeout(() => setShowConfirm2(true), 150);
+              }}
+            >
+              Yes, I'm sure
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showConfirm2} onOpenChange={setShowConfirm2}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Final Confirmation</AlertDialogTitle>
+            <AlertDialogDescription>
+              This is your last warning. Deleting this worker will hide all their payouts from the dashboard. This action cannot be easily undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={busy}
+              onClick={handleDeleteConfirm}
+            >
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Confirm Deletion
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
