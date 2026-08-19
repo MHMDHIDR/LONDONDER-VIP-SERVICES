@@ -86,12 +86,16 @@ export async function createPayout(input: {
   workerId: string;
   notes: string | null;
   items: NewPayoutItem[];
+  serviceId?: string | null;
+  paOrderId?: string | null;
 }): Promise<string> {
   const { data, error } = await supabase.rpc("create_payout", {
     _issue_date: input.issueDate,
     _worker_id: input.workerId,
     _notes: input.notes ?? "",
     _items: input.items as unknown as never,
+    _service_id: input.serviceId || null,
+    _pa_order_id: input.paOrderId || null,
   });
   if (error) throw new Error(error.message);
   return data as string;

@@ -164,9 +164,9 @@ function WorkerEditPage() {
 
             <div className="flex items-center justify-between rounded-lg border border-border p-4">
               <div className="space-y-0.5">
-                <Label htmlFor="active">Active Status</Label>
+                <Label htmlFor="active">{t("workers.activeStatus")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Inactive workers won't appear in the payout dropdown.
+                  {t("workers.activeStatusDesc")}
                 </p>
               </div>
               <Switch
@@ -192,7 +192,7 @@ function WorkerEditPage() {
         <section className="surface-card rounded-xl p-6">
           <div className="mb-6 flex items-center gap-2">
             <FileText className="h-5 w-5 text-gold" />
-            <h2 className="font-display text-2xl">Worker Payouts</h2>
+            <h2 className="font-display text-2xl">{t("workers.workerPayouts")}</h2>
           </div>
           
           {isLoadingPayouts ? (
@@ -222,7 +222,7 @@ function WorkerEditPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No payouts found for this worker.
+              {t("workers.noPayoutsFound")}
             </p>
           )}
         </section>
@@ -230,12 +230,12 @@ function WorkerEditPage() {
 
       {/* Danger Zone */}
       <div className="mt-16">
-        <h3 className="text-lg font-medium text-destructive mb-4">Danger Zone</h3>
+        <h3 className="text-lg font-medium text-destructive mb-4">{t("workers.dangerZone")}</h3>
         <section className="surface-card rounded-xl p-6 border-destructive/30 bg-destructive/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h4 className="font-medium text-destructive">Delete this worker</h4>
+            <h4 className="font-medium text-destructive">{t("workers.deleteWorkerPermanent")}</h4>
             <p className="text-sm text-destructive/80 mt-1 max-w-xl">
-              This action is permanent and will hide all associated payouts from the system. You will no longer be able to view or manage this worker's history.
+              {t("workers.deleteWorkerDesc")}
             </p>
           </div>
           <Button
@@ -245,7 +245,7 @@ function WorkerEditPage() {
             disabled={busy}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Worker
+            {t("workers.deleteWorker")}
           </Button>
         </section>
       </div>
@@ -254,13 +254,13 @@ function WorkerEditPage() {
       <AlertDialog open={showConfirm1} onOpenChange={setShowConfirm1}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("workers.deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will mark the worker as deleted. Are you sure you want to proceed?
+              {t("workers.deleteConfirmDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <Button
               variant="destructive"
               onClick={() => {
@@ -268,7 +268,7 @@ function WorkerEditPage() {
                 setTimeout(() => setShowConfirm2(true), 150);
               }}
             >
-              Yes, I'm sure
+              {t("common.yes")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -277,20 +277,20 @@ function WorkerEditPage() {
       <AlertDialog open={showConfirm2} onOpenChange={setShowConfirm2}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Final Confirmation</AlertDialogTitle>
+            <AlertDialogTitle>{t("workers.deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This is your last warning. Deleting this worker will hide all their payouts from the dashboard. This action cannot be easily undone.
+              {t("workers.deleteDoubleConfirmDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <Button
               variant="destructive"
               disabled={busy}
               onClick={handleDeleteConfirm}
             >
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Confirm Deletion
+              {t("workers.deleteWorker")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

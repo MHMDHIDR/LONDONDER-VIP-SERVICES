@@ -146,6 +146,8 @@ function NewReceiptPage() {
         workerId: workerId.trim() || "",
         notes: notes.trim() || null,
         items: payload,
+        serviceId,
+        paOrderId: paOrderId.trim() || null,
       });
 
       if (file) {
