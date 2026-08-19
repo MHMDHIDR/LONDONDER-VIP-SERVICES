@@ -41,14 +41,14 @@ function PayoutsDashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow={t("dashboard.eyebrow")}
-        title={t("dashboard.title")}
-        description={t("dashboard.description")}
+        eyebrow={t("payoutsDashboard.eyebrow")}
+        title={t("payoutsDashboard.title")}
+        description={t("payoutsDashboard.description")}
         actions={
           <Button asChild variant="premium" size="lg">
             <Link to="/payouts/new">
               <Plus aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
-              {t("dashboard.generateNew")}
+              {t("payoutsDashboard.generateNew")}
             </Link>
           </Button>
         }
@@ -63,7 +63,7 @@ function PayoutsDashboardPage() {
           <Input
             type="search"
             aria-label="Search payouts"
-            placeholder={t("dashboard.searchPlaceholder")}
+            placeholder={t("payoutsDashboard.searchPlaceholder")}
             className="ps-9"
             value={search}
             onChange={(e) => {
@@ -74,9 +74,9 @@ function PayoutsDashboardPage() {
         </div>
         <p aria-live="polite" className="text-sm text-muted-foreground">
           {isPending
-            ? t("dashboard.loadingPayouts")
-            : `${total} ${total === 1 ? t("dashboard.payoutCount") : t("dashboard.payoutsCount")}`}
-          {isFetching && !isPending ? t("dashboard.updating") : ""}
+            ? t("payoutsDashboard.loadingPayouts")
+            : `${total} ${total === 1 ? t("payoutsDashboard.payoutCount") : t("payoutsDashboard.payoutsCount")}`}
+          {isFetching && !isPending ? t("payoutsDashboard.updating") : ""}
         </p>
       </div>
 
@@ -99,8 +99,8 @@ function PayoutsDashboardPage() {
             <span className="gold-rule flex h-16 w-16 items-center justify-center rounded-full text-gold-foreground transition-transform group-hover:scale-105">
               <Plus aria-hidden="true" className="h-8 w-8" />
             </span>
-            <span className="font-display text-xl">{t("dashboard.generateNew")}</span>
-            <span className="text-xs text-muted-foreground">{t("dashboard.generateNewDesc")}</span>
+            <span className="font-display text-xl">{t("payoutsDashboard.generateNew")}</span>
+            <span className="text-xs text-muted-foreground">{t("payoutsDashboard.generateNewDesc")}</span>
           </Link>
         </li>
 
@@ -117,7 +117,7 @@ function PayoutsDashboardPage() {
                     <div>
                       <p className="text-eyebrow">{payout.payout_number}</p>
                       <h2 className="mt-1 font-display text-lg leading-tight">
-                        {payout.customer_name || t("dashboard.noCustomer")}
+                        {payout.customer_name || t("payoutsDashboard.noCustomer")}
                       </h2>
                     </div>
                     <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2 py-0.5 text-[0.65rem] uppercase tracking-wider text-gold-foreground">
@@ -126,7 +126,7 @@ function PayoutsDashboardPage() {
                   </div>
 
                   <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                    {payout.service_name_snapshot || t("dashboard.customLineItems")}
+                    {payout.service_name_snapshot || t("payoutsDashboard.customLineItems")}
                   </p>
 
                   <div className="mt-2 flex items-center gap-2">
@@ -140,11 +140,11 @@ function PayoutsDashboardPage() {
 
                   <dl className="mt-auto space-y-0.5 pt-3 text-sm">
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">{t("dashboard.date")}</dt>
+                      <dt className="text-muted-foreground">{t("payoutsDashboard.date")}</dt>
                       <dd>{formatDateLong(payout.issue_date)}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-muted-foreground">{t("dashboard.total")}</dt>
+                      <dt className="text-muted-foreground">{t("payoutsDashboard.total")}</dt>
                       <dd className="font-display text-base">{formatPence(payout.total_pence)}</dd>
                     </div>
                   </dl>
@@ -153,7 +153,7 @@ function PayoutsDashboardPage() {
                     <Button asChild size="sm" variant="outline" className="flex-1">
                       <Link to="/payouts/$id" params={{ id: payout.id }}>
                         <Eye aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
-                        {t("dashboard.view")}
+                        {t("payoutsDashboard.view")}
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="secondary" className="flex-1">
@@ -163,7 +163,7 @@ function PayoutsDashboardPage() {
                         search={{ download: true }}
                       >
                         <Download aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
-                        {t("dashboard.pdf")}
+                        {t("payoutsDashboard.pdf")}
                       </Link>
                     </Button>
                   </div>
@@ -176,10 +176,10 @@ function PayoutsDashboardPage() {
         <div className="surface-card mt-6 rounded-xl p-10 text-center">
           <FileText aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
           <h2 className="mt-4 font-display text-2xl">
-            {search ? t("dashboard.noPayoutsSearch") : t("dashboard.noPayouts")}
+            {search ? t("payoutsDashboard.noPayoutsSearch") : t("payoutsDashboard.noPayouts")}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            {search ? t("dashboard.noPayoutsSearchDesc") : t("dashboard.noPayoutsDesc")}
+            {search ? t("payoutsDashboard.noPayoutsSearchDesc") : t("payoutsDashboard.noPayoutsDesc")}
           </p>
         </div>
       ) : null}
@@ -192,7 +192,7 @@ function PayoutsDashboardPage() {
             disabled={isFetching}
           >
             {isFetching ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
-            {t("dashboard.loadMore", { count: total - rows.length })}
+            {t("payoutsDashboard.loadMore", { count: total - rows.length })}
           </Button>
         </div>
       ) : null}

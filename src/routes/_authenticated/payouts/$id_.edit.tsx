@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { WorkerSelect } from "@/components/WorkerSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
@@ -97,8 +98,9 @@ function EditPayoutPage() {
   const originalItems = data?.items;
 
   const [issueDate, setIssueDate] = useState("");
-  const [workerName, setCustomerName] = useState("");
-  const [workerPhone, setCustomerEmail] = useState("");
+  const [workerId, setWorkerId] = useState("");
+  const [workerName, setWorkerName] = useState("");
+  const [workerPhone, setWorkerPhone] = useState("");
   const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
@@ -110,8 +112,9 @@ function EditPayoutPage() {
   useEffect(() => {
     if (payout) {
       setIssueDate(payout.issue_date || "");
-      setCustomerName(payout.customer_name || "");
-      setCustomerEmail(payout.customer_email || "");
+      setWorkerId(payout.worker_id || "");
+      setWorkerName((payout as any).worker?.name || "");
+      setWorkerPhone(payout.worker_phone_snapshot || "");
       setPaOrderId(payout.pa_order_id || "");
       setNotes(payout.notes || "");
       setServiceId(payout.service_id || null);
@@ -190,8 +193,8 @@ function EditPayoutPage() {
         id,
         {
           issue_date: issueDate,
-          customer_name: workerName.trim() || null,
-          customer_email: workerPhone.trim() || null,
+          worker_id: workerId.trim() || null,
+          worker_phone_snapshot: workerPhone.trim() || null,
           notes: notes.trim() || null,
           pa_order_id: paOrderId.trim() || null,
           service_id: serviceId,
@@ -320,22 +323,24 @@ function EditPayoutPage() {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-name">{t("payout.workerNameOpt")}</Label>
-                <Input
-                  id="customer-name"
-                  value={workerName}
-                  maxLength={160}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                <Label htmlFor="worker-id">{t("payout.workerNameLabel")}</Label>
+                <WorkerSelect
+                  value={workerId}
+                  onChange={(w) => {
+                    setWorkerId(w.id);
+                    setWorkerPhone(w.phone || "");
+                    setWorkerName(w.name || "");
+                  }}
+                  t={t}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-email">{t("payout.workerPhoneOpt")}</Label>
+                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
                 <Input
-                  id="customer-email"
-                  type="email"
+                  id="worker-phone"
                   value={workerPhone}
-                  maxLength={254}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  readOnly
+                  disabled
                 />
               </div>
               <div className="space-y-2">

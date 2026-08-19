@@ -62,6 +62,7 @@ function NewReceiptPage() {
 
   const [issueDate, setIssueDate] = useState(todayLocalISO());
   const [workerId, setWorkerId] = useState("");
+  const [workerName, setWorkerName] = useState("");
   const [workerPhone, setWorkerPhone] = useState("");
   const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
@@ -253,26 +254,28 @@ function NewReceiptPage() {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-name">{t("receipt.workerIdOpt")}</Label>
-                <Input
-                  id="customer-name"
+                <Label htmlFor="worker-id">{t("payout.workerNameLabel")}</Label>
+                <WorkerSelect
                   value={workerId}
-                  maxLength={160}
-                  onChange={(e) => setWorkerId(e.target.value)}
+                  onChange={(w) => {
+                    setWorkerId(w.id);
+                    setWorkerPhone(w.phone || "");
+                    setWorkerName(w.name || "");
+                  }}
+                  t={t}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-email">{t("receipt.workerPhoneOpt")}</Label>
+                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
                 <Input
-                  id="customer-email"
-                  type="email"
+                  id="worker-phone"
                   value={workerPhone}
-                  maxLength={254}
-                  onChange={(e) => setWorkerPhone(e.target.value)}
+                  readOnly
+                  disabled
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pa-order-id">{t("receipt.paOrderIdOpt")}</Label>
+                <Label htmlFor="pa-order-id">{t("payout.paOrderIdOpt")}</Label>
                 <Input
                   id="pa-order-id"
                   value={paOrderId}
@@ -314,7 +317,7 @@ function NewReceiptPage() {
           <DocumentSummary
             date={issueDate}
             recipientLabel={t("receipt.client")}
-            recipientName={workerId}
+            recipientName={workerName}
             serviceName={
               selectedService ? (
                 <Link to="/services/$id" params={{ id: selectedService.id }} className="hover:underline">

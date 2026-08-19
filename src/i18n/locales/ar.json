@@ -244,7 +244,7 @@
     "payoutDate": "تاريخ الدفعة",
     "workerNameLabel": "اسم العامل",
     "workerPhoneLabel": "رقم هاتف العامل",
-    "paOrderIdOpt": "رقم الطلب (PA)",
+    "paOrderIdOpt": "رقم الطلب (PA) (اختياري)",
     "paOrderPlaceholder": "رابط لطلب محدد",
     "lineItems": "عناصر الدفعة",
     "addItem": "إضافة عنصر",
