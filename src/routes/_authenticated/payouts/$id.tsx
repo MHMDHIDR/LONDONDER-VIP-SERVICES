@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2, Pencil } from "lucide-react";
-import { fetchPayout, signedUrl, storePayoutPdf, softDeletePayout, LOGO_BUCKET } from "@/lib/api";
-import { fetchPayout, updatePayout, softDeletePayout, storePayoutPdf } from "@/lib/payouts-api";
+import { signedUrl, LOGO_BUCKET } from "@/lib/api";
+import { fetchPayout, softDeletePayout, storePayoutPdf } from "@/lib/payouts-api";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
