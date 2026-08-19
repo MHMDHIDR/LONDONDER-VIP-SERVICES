@@ -181,13 +181,13 @@ function EditPayoutPage() {
   const update = useMutation({
     mutationFn: async () => {
       const payload = items
+        .filter((item) => item.name.trim().length > 0)
         .map((item) => ({
-          name: item.name.trim().slice(0, 200),
-          description: item.description.trim().slice(0, 1000) || null,
-          quantity: Number.parseFloat(item.quantity),
-          unit_price_pence: parsePoundsToPence(item.unitPrice) ?? 0,
-        }))
-        .filter((item) => item.name.length > 0);
+          description: [item.name.trim().slice(0, 200), item.description.trim().slice(0, 1000)]
+            .filter(Boolean)
+            .join(" \u2013 "),
+          amount_pence: itemPence(item),
+        }));
 
       await updatePayout(
         id,
@@ -323,7 +323,6 @@ function EditPayoutPage() {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="worker-id">{t("payout.workerNameLabel")}</Label>
                 <WorkerSelect
                   value={workerId}
                   onChange={(w) => {
@@ -532,7 +531,7 @@ function EditPayoutPage() {
               <div className="relative border-l-2 border-border ml-4 space-y-6">
                 {payout.updated_at && payout.updated_at !== payout.created_at && updater && (
                   <div className="relative pl-6">
-                    <span className="absolute -left-[17px] top-0 bg-background rounded-full">
+                    <span className="absolute -left-4.25 top-0 bg-background rounded-full">
                       <Avatar className="h-8 w-8 border-2 border-background">
                         <AvatarFallback className="text-xs">
                           {getInitials(updater.full_name || updater.email)}
@@ -554,7 +553,7 @@ function EditPayoutPage() {
                 )}
                 
                 <div className="relative pl-6">
-                  <span className="absolute -left-[17px] top-0 bg-background rounded-full">
+                  <span className="absolute -left-4.25 top-0 bg-background rounded-full">
                     <Avatar className="h-8 w-8 border-2 border-background">
                       <AvatarFallback className="text-xs">
                         {getInitials(creator?.full_name || creator?.email || "Unknown")}

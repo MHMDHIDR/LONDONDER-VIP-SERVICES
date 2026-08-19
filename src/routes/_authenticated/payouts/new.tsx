@@ -133,21 +133,18 @@ function NewReceiptPage() {
   const generate = useMutation({
     mutationFn: async () => {
       const payload = items
+        .filter((item) => item.name.trim().length > 0)
         .map((item) => ({
-          name: item.name.trim().slice(0, 200),
-          description: item.description.trim().slice(0, 1000) || null,
-          quantity: Number.parseFloat(item.quantity),
-          unit_price_pence: parsePoundsToPence(item.unitPrice) ?? 0,
-        }))
-        .filter((item) => item.name.length > 0);
+          description: [item.name.trim().slice(0, 200), item.description.trim().slice(0, 1000)]
+            .filter(Boolean)
+            .join(" – "),
+          amount_pence: itemPence(item),
+        }));
 
       const id = await createPayout({
         issueDate,
-        workerId: workerId.trim() || null,
-        workerPhone: workerPhone.trim() || null,
+        workerId: workerId.trim() || "",
         notes: notes.trim() || null,
-        paOrderId: paOrderId.trim() || null,
-        serviceId,
         items: payload,
       });
 
@@ -164,8 +161,8 @@ function NewReceiptPage() {
     },
     onSuccess: (id) => {
       toast.success("Receipt generated");
-      queryClient.invalidateQueries({ queryKey: ["receipts"] });
-      navigate({ to: "/receipts/$id", params: { id } });
+      queryClient.invalidateQueries({ queryKey: ["payouts"] });
+      navigate({ to: "/payouts/$id", params: { id } });
     },
     onError: (error: Error) => setFormError(error.message),
   });
