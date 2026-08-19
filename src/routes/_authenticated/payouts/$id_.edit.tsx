@@ -217,9 +217,6 @@ function EditPayoutPage() {
     if (update.isPending) return;
 
     if (!issueDate) return setFormError("Choose a payout date.");
-    if (workerPhone.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(workerPhone.trim())) {
-      return setFormError("Enter a valid customer email or leave it blank.");
-    }
     const valid = items.filter((item) => item.name.trim());
     if (valid.length === 0) return setFormError("Add at least one line item with a name.");
     for (const item of valid) {
@@ -322,17 +319,15 @@ function EditPayoutPage() {
                   <p className="text-xs text-muted-foreground">Resolving historical price…</p>
                 ) : null}
               </div>
-              <div className="space-y-2">
-                <WorkerSelect
-                  value={workerId}
-                  onChange={(w) => {
-                    setWorkerId(w.id);
-                    setWorkerPhone(w.phone || "");
-                    setWorkerName(w.name || "");
-                  }}
-                  t={t}
-                />
-              </div>
+              <WorkerSelect
+                value={workerId}
+                onChange={(w) => {
+                  setWorkerId(w.id);
+                  setWorkerPhone(w.phone || "");
+                  setWorkerName(w.name || "");
+                }}
+                t={t}
+              />
               <div className="space-y-2">
                 <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
                 <Input
@@ -468,7 +463,7 @@ function EditPayoutPage() {
                 <dd className="text-right">{formatDateLong(issueDate)}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">{t("payout.client")}</dt>
+                <dt className="text-muted-foreground">{t("payout.worker")}</dt>
                 <dd className="text-right">{workerName.trim() || "—"}</dd>
               </div>
               <div className="flex justify-between gap-4">

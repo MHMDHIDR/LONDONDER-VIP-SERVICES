@@ -102,7 +102,7 @@ export async function buildDocumentPdf(args: {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text(isInvoice ? "BILLED TO" : "PAID TO", MARGIN, y);
+  doc.text(isInvoice ? "BILLED TO" : "WORKER", MARGIN, y);
   doc.text("ISSUE DATE", PAGE_WIDTH / 2 + 10, y);
   y += 5;
   doc.setFontSize(11);

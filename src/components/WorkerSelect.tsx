@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { fetchWorkers, type Worker } from "@/lib/workers-api";
 import { Label } from "@/components/ui/label";
+import { CreateWorkerSheet } from "@/components/CreateWorkerSheet";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,6 +23,7 @@ interface WorkerSelectProps {
 }
 
 export function WorkerSelect({ value, onChange, t }: WorkerSelectProps) {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { data: workers = [] } = useQuery({
     queryKey: ["workers"],
     queryFn: () => fetchWorkers(false), // only active workers
@@ -39,10 +42,7 @@ export function WorkerSelect({ value, onChange, t }: WorkerSelectProps) {
         <Label htmlFor="worker" className="text-paper-900">
           {t("payout.workerNameLabel")}
         </Label>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-gold-600 hover:text-gold-700" onClick={() => {
-           // We can open a dialog here later
-           alert("Create worker dialog not implemented yet");
-        }}>
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-gold-600 hover:text-gold-700" onClick={() => setSheetOpen(true)}>
           <Plus className="h-4 w-4 me-1" />
           {t("workers.createWorker")}
         </Button>
@@ -64,6 +64,11 @@ export function WorkerSelect({ value, onChange, t }: WorkerSelectProps) {
           )}
         </SelectContent>
       </Select>
+      <CreateWorkerSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onSuccess={(w) => onChange(w)}
+      />
     </div>
   );
 }

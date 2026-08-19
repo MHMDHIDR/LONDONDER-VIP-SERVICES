@@ -173,9 +173,6 @@ function NewReceiptPage() {
     if (generate.isPending) return;
 
     if (!issueDate) return setFormError("Choose a receipt date.");
-    if (workerPhone.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(workerPhone.trim())) {
-      return setFormError("Enter a valid customer email or leave it blank.");
-    }
     const valid = items.filter((item) => item.name.trim());
     if (valid.length === 0) return setFormError("Add at least one line item with a name.");
     for (const item of valid) {
@@ -250,18 +247,15 @@ function NewReceiptPage() {
                   <p className="text-xs text-muted-foreground">Resolving historical price…</p>
                 ) : null}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="worker-id">{t("payout.workerNameLabel")}</Label>
-                <WorkerSelect
-                  value={workerId}
-                  onChange={(w) => {
-                    setWorkerId(w.id);
-                    setWorkerPhone(w.phone || "");
-                    setWorkerName(w.name || "");
-                  }}
-                  t={t}
-                />
-              </div>
+              <WorkerSelect
+                value={workerId}
+                onChange={(w) => {
+                  setWorkerId(w.id);
+                  setWorkerPhone(w.phone || "");
+                  setWorkerName(w.name || "");
+                }}
+                t={t}
+              />
               <div className="space-y-2">
                 <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
                 <Input
@@ -290,8 +284,7 @@ function NewReceiptPage() {
                       e.preventDefault();
                     }
                   }}
-                  placeholder={t("receipt.paOrderPlaceholder")}
-                  required
+                  placeholder={t("payout.paOrderPlaceholder")}
                 />
               </div>
             </div>
@@ -313,7 +306,7 @@ function NewReceiptPage() {
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <DocumentSummary
             date={issueDate}
-            recipientLabel={t("receipt.client")}
+            recipientLabel={t("payout.worker")}
             recipientName={workerName}
             serviceName={
               selectedService ? (
