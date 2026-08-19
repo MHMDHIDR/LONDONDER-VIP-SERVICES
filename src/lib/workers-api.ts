@@ -15,7 +15,7 @@ function unwrap<T>(res: { data: T | null; error: { message: string } | null }): 
 }
 
 export async function fetchWorkers(includeInactive = false): Promise<Worker[]> {
-  let query = supabase.from("workers").select("*").order("name", { ascending: true });
+  let query = supabase.from("workers").select("*").is("deleted_at", null).order("name", { ascending: true });
   if (!includeInactive) query = query.eq("active", true);
   const res = await query;
   return unwrap(res) ?? [];
@@ -64,6 +64,9 @@ export async function updateWorker(input: {
 }
 
 export async function deleteWorker(input: { data: string }) {
-  const { error } = await supabase.from("workers").delete().eq("id", input.data);
+  const { error } = await supabase
+    .from("workers")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", input.data);
   if (error) throw new Error(error.message);
 }

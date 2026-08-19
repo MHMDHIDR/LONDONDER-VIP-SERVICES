@@ -19,13 +19,19 @@ export async function fetchPayouts(opts: {
   search: string;
   limit: number;
   offset: number;
+  workerId?: string;
 }): Promise<PayoutPage> {
   let query = supabase
     .from("payouts")
-    .select("*, worker:workers(id, name), creator:profiles!payouts_creator_fkey(id, full_name, email), updater:profiles!payouts_updater_fkey(id, full_name, email)", { count: "exact" })
+    .select("*, worker:workers!inner(id, name, deleted_at), creator:profiles!payouts_creator_fkey(id, full_name, email), updater:profiles!payouts_updater_fkey(id, full_name, email)", { count: "exact" })
     .is("deleted_at", null)
+    .is("worker.deleted_at", null)
     .order("created_at", { ascending: false })
     .range(opts.offset, opts.offset + opts.limit - 1);
+
+  if (opts.workerId) {
+    query = query.eq("worker_id", opts.workerId);
+  }
 
   const term = opts.search.trim().replace(/[%,()]/g, "");
   if (term) {
