@@ -1,9 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 
 export type Worker = Tables<"workers">;
+
+async function requireUserId(): Promise<string> {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) throw new Error("You need to be signed in.");
+  return data.user.id;
+}
 
 function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) throw new Error(res.error.message);
@@ -22,60 +26,44 @@ export async function fetchWorker(id: string): Promise<Worker | null> {
   return unwrap(res) ?? null;
 }
 
-export const createWorker = createServerFn({ method: "POST" })
-  .validator(
-    z.object({
-      name: z.string().min(1),
-      phone: z.string().nullable().optional(),
+export async function createWorker(input: { data: { name: string; phone?: string | null } }) {
+  const userId = await requireUserId();
+  const res = await supabase
+    .from("workers")
+    .insert({
+      user_id: userId,
+      name: input.data.name.trim(),
+      phone: input.data.phone?.trim() || "",
     })
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: worker, error } = await supabaseAdmin
-      .from("workers")
-      .insert({
-        name: data.name,
-        phone: data.phone,
-      })
-      .select("*")
-      .single();
+    .select("*")
+    .single();
 
-    if (error) throw new Error(error.message);
-    return worker;
-  });
+  if (res.error) throw new Error(res.error.message);
+  return res.data as Worker;
+}
 
-export const updateWorker = createServerFn({ method: "POST" })
-  .validator(
-    z.object({
-      id: z.string().uuid(),
-      patch: z.object({
-        name: z.string().optional(),
-        phone: z.string().nullable().optional(),
-        active: z.boolean().optional(),
-      }),
-    })
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: worker, error } = await supabaseAdmin
-      .from("workers")
-      .update(data.patch)
-      .eq("id", data.id)
-      .select("*")
-      .single();
+export async function updateWorker(input: {
+  data: {
+    id: string;
+    patch: { name?: string; phone?: string | null; active?: boolean };
+  };
+}) {
+  const patch: any = { ...input.data.patch };
+  if (typeof patch.name === "string") patch.name = patch.name.trim();
+  if (typeof patch.phone === "string") patch.phone = patch.phone.trim();
+  
+  const res = await supabase
+    .from("workers")
+    .update(patch)
+    .eq("id", input.data.id)
+    .select("*")
+    .single();
 
-    if (error) throw new Error(error.message);
-    return worker;
-  });
+  if (res.error) throw new Error(res.error.message);
+  return res.data as Worker;
+}
 
-export const deleteWorker = createServerFn({ method: "POST" })
-  .validator(z.string().uuid())
-  .handler(async ({ data: id }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("workers")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw new Error(error.message);
-  });
+export async function deleteWorker(input: { data: string }) {
+  const { error } = await supabase.from("workers").delete().eq("id", input.data);
+  if (error) throw new Error(error.message);
+}
