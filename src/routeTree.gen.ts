@@ -15,13 +15,19 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedInvoicesIdRouteImport } from './routes/_authenticated/invoices/$id'
+import { Route as AuthenticatedInvoicesNewRouteImport } from './routes/_authenticated/invoices/new'
 import { Route as AuthenticatedManagersIndexRouteImport } from './routes/_authenticated/managers/index'
 import { Route as AuthenticatedManagersIdRouteImport } from './routes/_authenticated/managers/$id'
-import { Route as AuthenticatedReceiptsIdRouteImport } from './routes/_authenticated/receipts/$id'
-import { Route as AuthenticatedReceiptsNewRouteImport } from './routes/_authenticated/receipts/new'
+import { Route as AuthenticatedPayoutsIndexRouteImport } from './routes/_authenticated/payouts/index'
+import { Route as AuthenticatedPayoutsIdRouteImport } from './routes/_authenticated/payouts/$id'
+import { Route as AuthenticatedPayoutsNewRouteImport } from './routes/_authenticated/payouts/new'
 import { Route as AuthenticatedServicesIndexRouteImport } from './routes/_authenticated/services/index'
 import { Route as AuthenticatedServicesIdRouteImport } from './routes/_authenticated/services/$id'
-import { Route as AuthenticatedReceiptsIdEditRouteImport } from './routes/_authenticated/receipts/$id_.edit'
+import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers/index'
+import { Route as AuthenticatedWorkersIdRouteImport } from './routes/_authenticated/workers/$id'
+import { Route as AuthenticatedInvoicesIdEditRouteImport } from './routes/_authenticated/invoices/$id_.edit'
+import { Route as AuthenticatedPayoutsIdEditRouteImport } from './routes/_authenticated/payouts/$id_.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +58,17 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInvoicesIdRoute = AuthenticatedInvoicesIdRouteImport.update({
+  id: '/invoices/$id',
+  path: '/invoices/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesNewRoute =
+  AuthenticatedInvoicesNewRouteImport.update({
+    id: '/invoices/new',
+    path: '/invoices/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedManagersIndexRoute =
   AuthenticatedManagersIndexRouteImport.update({
     id: '/managers/',
@@ -63,17 +80,22 @@ const AuthenticatedManagersIdRoute = AuthenticatedManagersIdRouteImport.update({
   path: '/managers/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedReceiptsIdRoute = AuthenticatedReceiptsIdRouteImport.update({
-  id: '/receipts/$id',
-  path: '/receipts/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReceiptsNewRoute =
-  AuthenticatedReceiptsNewRouteImport.update({
-    id: '/receipts/new',
-    path: '/receipts/new',
+const AuthenticatedPayoutsIndexRoute =
+  AuthenticatedPayoutsIndexRouteImport.update({
+    id: '/payouts/',
+    path: '/payouts/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPayoutsIdRoute = AuthenticatedPayoutsIdRouteImport.update({
+  id: '/payouts/$id',
+  path: '/payouts/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPayoutsNewRoute = AuthenticatedPayoutsNewRouteImport.update({
+  id: '/payouts/new',
+  path: '/payouts/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedServicesIndexRoute =
   AuthenticatedServicesIndexRouteImport.update({
     id: '/services/',
@@ -85,10 +107,27 @@ const AuthenticatedServicesIdRoute = AuthenticatedServicesIdRouteImport.update({
   path: '/services/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedReceiptsIdEditRoute =
-  AuthenticatedReceiptsIdEditRouteImport.update({
-    id: '/receipts/$id_/edit',
-    path: '/receipts/$id/edit',
+const AuthenticatedWorkersIndexRoute =
+  AuthenticatedWorkersIndexRouteImport.update({
+    id: '/workers/',
+    path: '/workers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkersIdRoute = AuthenticatedWorkersIdRouteImport.update({
+  id: '/workers/$id',
+  path: '/workers/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesIdEditRoute =
+  AuthenticatedInvoicesIdEditRouteImport.update({
+    id: '/invoices/$id_/edit',
+    path: '/invoices/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPayoutsIdEditRoute =
+  AuthenticatedPayoutsIdEditRouteImport.update({
+    id: '/payouts/$id_/edit',
+    path: '/payouts/$id/edit',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -98,13 +137,19 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/invoices/new': typeof AuthenticatedInvoicesNewRoute
   '/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
-  '/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/payouts/$id': typeof AuthenticatedPayoutsIdRoute
+  '/payouts/new': typeof AuthenticatedPayoutsNewRoute
   '/services/$id': typeof AuthenticatedServicesIdRoute
+  '/workers/$id': typeof AuthenticatedWorkersIdRoute
   '/managers/': typeof AuthenticatedManagersIndexRoute
+  '/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/services/': typeof AuthenticatedServicesIndexRoute
-  '/receipts/$id/edit': typeof AuthenticatedReceiptsIdEditRoute
+  '/workers/': typeof AuthenticatedWorkersIndexRoute
+  '/invoices/$id/edit': typeof AuthenticatedInvoicesIdEditRoute
+  '/payouts/$id/edit': typeof AuthenticatedPayoutsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,13 +157,19 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/invoices/new': typeof AuthenticatedInvoicesNewRoute
   '/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/receipts/$id': typeof AuthenticatedReceiptsIdRoute
-  '/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/payouts/$id': typeof AuthenticatedPayoutsIdRoute
+  '/payouts/new': typeof AuthenticatedPayoutsNewRoute
   '/services/$id': typeof AuthenticatedServicesIdRoute
+  '/workers/$id': typeof AuthenticatedWorkersIdRoute
   '/managers': typeof AuthenticatedManagersIndexRoute
+  '/payouts': typeof AuthenticatedPayoutsIndexRoute
   '/services': typeof AuthenticatedServicesIndexRoute
-  '/receipts/$id/edit': typeof AuthenticatedReceiptsIdEditRoute
+  '/workers': typeof AuthenticatedWorkersIndexRoute
+  '/invoices/$id/edit': typeof AuthenticatedInvoicesIdEditRoute
+  '/payouts/$id/edit': typeof AuthenticatedPayoutsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,13 +179,19 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/invoices/$id': typeof AuthenticatedInvoicesIdRoute
+  '/_authenticated/invoices/new': typeof AuthenticatedInvoicesNewRoute
   '/_authenticated/managers/$id': typeof AuthenticatedManagersIdRoute
-  '/_authenticated/receipts/$id': typeof AuthenticatedReceiptsIdRoute
-  '/_authenticated/receipts/new': typeof AuthenticatedReceiptsNewRoute
+  '/_authenticated/payouts/$id': typeof AuthenticatedPayoutsIdRoute
+  '/_authenticated/payouts/new': typeof AuthenticatedPayoutsNewRoute
   '/_authenticated/services/$id': typeof AuthenticatedServicesIdRoute
+  '/_authenticated/workers/$id': typeof AuthenticatedWorkersIdRoute
   '/_authenticated/managers/': typeof AuthenticatedManagersIndexRoute
+  '/_authenticated/payouts/': typeof AuthenticatedPayoutsIndexRoute
   '/_authenticated/services/': typeof AuthenticatedServicesIndexRoute
-  '/_authenticated/receipts/$id_/edit': typeof AuthenticatedReceiptsIdEditRoute
+  '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
+  '/_authenticated/invoices/$id_/edit': typeof AuthenticatedInvoicesIdEditRoute
+  '/_authenticated/payouts/$id_/edit': typeof AuthenticatedPayoutsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -144,13 +201,19 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/dashboard'
     | '/settings'
+    | '/invoices/$id'
+    | '/invoices/new'
     | '/managers/$id'
-    | '/receipts/$id'
-    | '/receipts/new'
+    | '/payouts/$id'
+    | '/payouts/new'
     | '/services/$id'
+    | '/workers/$id'
     | '/managers/'
+    | '/payouts/'
     | '/services/'
-    | '/receipts/$id/edit'
+    | '/workers/'
+    | '/invoices/$id/edit'
+    | '/payouts/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,13 +221,19 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/dashboard'
     | '/settings'
+    | '/invoices/$id'
+    | '/invoices/new'
     | '/managers/$id'
-    | '/receipts/$id'
-    | '/receipts/new'
+    | '/payouts/$id'
+    | '/payouts/new'
     | '/services/$id'
+    | '/workers/$id'
     | '/managers'
+    | '/payouts'
     | '/services'
-    | '/receipts/$id/edit'
+    | '/workers'
+    | '/invoices/$id/edit'
+    | '/payouts/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -173,13 +242,19 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/dashboard'
     | '/_authenticated/settings'
+    | '/_authenticated/invoices/$id'
+    | '/_authenticated/invoices/new'
     | '/_authenticated/managers/$id'
-    | '/_authenticated/receipts/$id'
-    | '/_authenticated/receipts/new'
+    | '/_authenticated/payouts/$id'
+    | '/_authenticated/payouts/new'
     | '/_authenticated/services/$id'
+    | '/_authenticated/workers/$id'
     | '/_authenticated/managers/'
+    | '/_authenticated/payouts/'
     | '/_authenticated/services/'
-    | '/_authenticated/receipts/$id_/edit'
+    | '/_authenticated/workers/'
+    | '/_authenticated/invoices/$id_/edit'
+    | '/_authenticated/payouts/$id_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -233,6 +308,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invoices/$id': {
+      id: '/_authenticated/invoices/$id'
+      path: '/invoices/$id'
+      fullPath: '/invoices/$id'
+      preLoaderRoute: typeof AuthenticatedInvoicesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices/new': {
+      id: '/_authenticated/invoices/new'
+      path: '/invoices/new'
+      fullPath: '/invoices/new'
+      preLoaderRoute: typeof AuthenticatedInvoicesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/managers/': {
       id: '/_authenticated/managers/'
       path: '/managers'
@@ -247,18 +336,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManagersIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/receipts/$id': {
-      id: '/_authenticated/receipts/$id'
-      path: '/receipts/$id'
-      fullPath: '/receipts/$id'
-      preLoaderRoute: typeof AuthenticatedReceiptsIdRouteImport
+    '/_authenticated/payouts/': {
+      id: '/_authenticated/payouts/'
+      path: '/payouts'
+      fullPath: '/payouts/'
+      preLoaderRoute: typeof AuthenticatedPayoutsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/receipts/new': {
-      id: '/_authenticated/receipts/new'
-      path: '/receipts/new'
-      fullPath: '/receipts/new'
-      preLoaderRoute: typeof AuthenticatedReceiptsNewRouteImport
+    '/_authenticated/payouts/$id': {
+      id: '/_authenticated/payouts/$id'
+      path: '/payouts/$id'
+      fullPath: '/payouts/$id'
+      preLoaderRoute: typeof AuthenticatedPayoutsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payouts/new': {
+      id: '/_authenticated/payouts/new'
+      path: '/payouts/new'
+      fullPath: '/payouts/new'
+      preLoaderRoute: typeof AuthenticatedPayoutsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/services/': {
@@ -275,11 +371,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServicesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/receipts/$id_/edit': {
-      id: '/_authenticated/receipts/$id_/edit'
-      path: '/receipts/$id/edit'
-      fullPath: '/receipts/$id/edit'
-      preLoaderRoute: typeof AuthenticatedReceiptsIdEditRouteImport
+    '/_authenticated/workers/': {
+      id: '/_authenticated/workers/'
+      path: '/workers'
+      fullPath: '/workers/'
+      preLoaderRoute: typeof AuthenticatedWorkersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workers/$id': {
+      id: '/_authenticated/workers/$id'
+      path: '/workers/$id'
+      fullPath: '/workers/$id'
+      preLoaderRoute: typeof AuthenticatedWorkersIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices/$id_/edit': {
+      id: '/_authenticated/invoices/$id_/edit'
+      path: '/invoices/$id/edit'
+      fullPath: '/invoices/$id/edit'
+      preLoaderRoute: typeof AuthenticatedInvoicesIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payouts/$id_/edit': {
+      id: '/_authenticated/payouts/$id_/edit'
+      path: '/payouts/$id/edit'
+      fullPath: '/payouts/$id/edit'
+      preLoaderRoute: typeof AuthenticatedPayoutsIdEditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -288,25 +405,37 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedInvoicesIdRoute: typeof AuthenticatedInvoicesIdRoute
+  AuthenticatedInvoicesNewRoute: typeof AuthenticatedInvoicesNewRoute
   AuthenticatedManagersIdRoute: typeof AuthenticatedManagersIdRoute
-  AuthenticatedReceiptsIdRoute: typeof AuthenticatedReceiptsIdRoute
-  AuthenticatedReceiptsNewRoute: typeof AuthenticatedReceiptsNewRoute
+  AuthenticatedPayoutsIdRoute: typeof AuthenticatedPayoutsIdRoute
+  AuthenticatedPayoutsNewRoute: typeof AuthenticatedPayoutsNewRoute
   AuthenticatedServicesIdRoute: typeof AuthenticatedServicesIdRoute
+  AuthenticatedWorkersIdRoute: typeof AuthenticatedWorkersIdRoute
   AuthenticatedManagersIndexRoute: typeof AuthenticatedManagersIndexRoute
+  AuthenticatedPayoutsIndexRoute: typeof AuthenticatedPayoutsIndexRoute
   AuthenticatedServicesIndexRoute: typeof AuthenticatedServicesIndexRoute
-  AuthenticatedReceiptsIdEditRoute: typeof AuthenticatedReceiptsIdEditRoute
+  AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
+  AuthenticatedInvoicesIdEditRoute: typeof AuthenticatedInvoicesIdEditRoute
+  AuthenticatedPayoutsIdEditRoute: typeof AuthenticatedPayoutsIdEditRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedInvoicesIdRoute: AuthenticatedInvoicesIdRoute,
+  AuthenticatedInvoicesNewRoute: AuthenticatedInvoicesNewRoute,
   AuthenticatedManagersIdRoute: AuthenticatedManagersIdRoute,
-  AuthenticatedReceiptsIdRoute: AuthenticatedReceiptsIdRoute,
-  AuthenticatedReceiptsNewRoute: AuthenticatedReceiptsNewRoute,
+  AuthenticatedPayoutsIdRoute: AuthenticatedPayoutsIdRoute,
+  AuthenticatedPayoutsNewRoute: AuthenticatedPayoutsNewRoute,
   AuthenticatedServicesIdRoute: AuthenticatedServicesIdRoute,
+  AuthenticatedWorkersIdRoute: AuthenticatedWorkersIdRoute,
   AuthenticatedManagersIndexRoute: AuthenticatedManagersIndexRoute,
+  AuthenticatedPayoutsIndexRoute: AuthenticatedPayoutsIndexRoute,
   AuthenticatedServicesIndexRoute: AuthenticatedServicesIndexRoute,
-  AuthenticatedReceiptsIdEditRoute: AuthenticatedReceiptsIdEditRoute,
+  AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
+  AuthenticatedInvoicesIdEditRoute: AuthenticatedInvoicesIdEditRoute,
+  AuthenticatedPayoutsIdEditRoute: AuthenticatedPayoutsIdEditRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

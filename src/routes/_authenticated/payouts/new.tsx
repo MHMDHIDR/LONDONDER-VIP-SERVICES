@@ -6,12 +6,11 @@ import { Loader2, Plus, Trash2, Paperclip, Receipt as ReceiptIcon } from "lucide
 import {
   ATTACHMENT_MIME,
   MAX_ATTACHMENT_BYTES,
-  attachPayoutEvidence,
-  createPayout,
   fetchServices,
   resolvePriceAt,
   type Service,
 } from "@/lib/api";
+import { attachPayoutEvidence, createPayout } from "@/lib/payouts-api";
 import {
   formatDateLong,
   formatPence,
