@@ -33,12 +33,13 @@ async function loadImageDataUrl(url: string): Promise<{ data: string; ratio: num
   }
 }
 
-export async function buildReceiptPdf(args: {
+export async function buildDocumentPdf(args: {
+  type: "invoice" | "payout";
   receipt: Receipt;
   items: ReceiptItem[];
   logoUrl?: string | null;
 }): Promise<Blob> {
-  const { receipt, items } = args;
+  const { type, receipt, items } = args;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
 
@@ -76,15 +77,17 @@ export async function buildReceiptPdf(args: {
     y += h + 6;
   }
 
+  const isInvoice = type === "invoice";
+
   doc.setTextColor(...INK);
   doc.setFont("times", "bold");
   doc.setFontSize(22);
-  doc.text(receipt.business_name_snapshot || "Receipt", MARGIN, y + 2);
+  doc.text(receipt.business_name_snapshot || (isInvoice ? "Invoice" : "Payout"), MARGIN, y + 2);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
-  doc.text("RECEIPT", PAGE_WIDTH - MARGIN, y - 4, { align: "right" });
+  doc.text(isInvoice ? "INVOICE" : "PAYOUT - دفعة", PAGE_WIDTH - MARGIN, y - 4, { align: "right" });
   doc.setFontSize(13);
   doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");
@@ -99,7 +102,7 @@ export async function buildReceiptPdf(args: {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("ISSUED TO", MARGIN, y);
+  doc.text(isInvoice ? "BILLED TO" : "PAID TO", MARGIN, y);
   doc.text("ISSUE DATE", PAGE_WIDTH / 2 + 10, y);
   y += 5;
   doc.setFontSize(11);
@@ -199,6 +202,16 @@ export async function buildReceiptPdf(args: {
 
   return doc.output("blob");
 }
+
+export async function buildInvoicePdf(args: Omit<Parameters<typeof buildDocumentPdf>[0], "type">) {
+  return buildDocumentPdf({ ...args, type: "invoice" });
+}
+
+export async function buildPayoutPdf(args: Omit<Parameters<typeof buildDocumentPdf>[0], "type">) {
+  return buildDocumentPdf({ ...args, type: "payout" });
+}
+
+export const buildReceiptPdf = buildInvoicePdf;
 
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);

@@ -238,7 +238,7 @@ function ManagerDetailsPage() {
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
-                          <Link to="/receipts/$id" params={{ id: r.id }}>
+                          <Link to="/invoices/$id" params={{ id: r.id }}>
                             <Badge variant="outline" className="cursor-pointer hover:bg-muted">
                               {r.receipt_number}
                             </Badge>
@@ -259,7 +259,7 @@ function ManagerDetailsPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" asChild>
-                            <Link to="/receipts/$id/edit" params={{ id: r.id }}>
+                            <Link to="/invoices/$id/edit" params={{ id: r.id }}>
                               <Edit className="h-4 w-4" />
                             </Link>
                           </Button>

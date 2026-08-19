@@ -22,7 +22,7 @@ import { buildReceiptPdf, downloadBlob } from "@/lib/pdf";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const Route = createFileRoute("/_authenticated/receipts/$id")({
+export const Route = createFileRoute("/_authenticated/invoices/$id")({
   validateSearch: (search: Record<string, unknown>): { download?: boolean } => ({
     download: search.download === true || search.download === "true" ? true : undefined,
   }),

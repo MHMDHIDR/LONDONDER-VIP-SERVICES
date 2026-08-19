@@ -3,7 +3,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus, Search, FileText, Loader2, AlertTriangle, Download, Eye } from "lucide-react";
-import { fetchReceipts } from "@/lib/api";
+import { fetchPayouts } from "@/lib/payouts-api";
 import { formatDateLong, formatPence } from "@/lib/money";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -12,26 +12,26 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const PAGE_SIZE = 11;
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/payouts/")({
   head: () => ({
     meta: [
-      { title: "Dashboard, Generative Invoices" },
-      { name: "description", content: "Browse, search and download your generated GBP receipts." },
-      { property: "og:title", content: "Dashboard, Generative Invoices" },
-      { property: "og:description", content: "Your saved concierge service receipts." },
+      { title: "Payouts, Generative Payouts" },
+      { name: "description", content: "Browse, search and download your generated GBP payouts." },
+      { property: "og:title", content: "Payouts, Generative Payouts" },
+      { property: "og:description", content: "Your saved concierge service payouts." },
     ],
   }),
-  component: DashboardPage,
+  component: PayoutsDashboardPage,
 });
 
-function DashboardPage() {
+function PayoutsDashboardPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(PAGE_SIZE);
 
   const { data, isPending, isError, error, isFetching } = useQuery({
-    queryKey: ["receipts", search, limit],
-    queryFn: () => fetchReceipts({ search, limit, offset: 0 }),
+    queryKey: ["payouts", search, limit],
+    queryFn: () => fetchPayouts({ search, limit, offset: 0 }),
     placeholderData: keepPreviousData,
   });
 
@@ -46,7 +46,7 @@ function DashboardPage() {
         description={t("dashboard.description")}
         actions={
           <Button asChild variant="premium" size="lg">
-            <Link to="/invoices/new">
+            <Link to="/payouts/new">
               <Plus aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
               {t("dashboard.generateNew")}
             </Link>
@@ -62,7 +62,7 @@ function DashboardPage() {
           />
           <Input
             type="search"
-            aria-label="Search receipts"
+            aria-label="Search payouts"
             placeholder={t("dashboard.searchPlaceholder")}
             className="ps-9"
             value={search}
@@ -74,8 +74,8 @@ function DashboardPage() {
         </div>
         <p aria-live="polite" className="text-sm text-muted-foreground">
           {isPending
-            ? t("dashboard.loadingReceipts")
-            : `${total} ${total === 1 ? t("dashboard.receiptCount") : t("dashboard.receiptsCount")}`}
+            ? t("dashboard.loadingPayouts")
+            : `${total} ${total === 1 ? t("dashboard.payoutCount") : t("dashboard.payoutsCount")}`}
           {isFetching && !isPending ? t("dashboard.updating") : ""}
         </p>
       </div>
@@ -93,7 +93,7 @@ function DashboardPage() {
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <li>
           <Link
-            to="/invoices/new"
+            to="/payouts/new"
             className="group flex h-full min-h-[15rem] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-input bg-card p-6 text-center transition-all hover:border-gold hover:shadow-[var(--shadow-lift)]"
           >
             <span className="gold-rule flex h-16 w-16 items-center justify-center rounded-full text-gold-foreground transition-transform group-hover:scale-105">
@@ -110,56 +110,56 @@ function DashboardPage() {
                 <Skeleton className="h-[15rem] w-full rounded-xl" />
               </li>
             ))
-          : rows.map((receipt) => (
-              <li key={receipt.id}>
+          : rows.map((payout) => (
+              <li key={payout.id}>
                 <article className="surface-card flex h-full min-h-[15rem] flex-col rounded-xl p-4 transition-shadow hover:shadow-[var(--shadow-lift)]">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-eyebrow">{receipt.receipt_number}</p>
+                      <p className="text-eyebrow">{payout.payout_number}</p>
                       <h2 className="mt-1 font-display text-lg leading-tight">
-                        {receipt.customer_name || t("dashboard.noCustomer")}
+                        {payout.customer_name || t("dashboard.noCustomer")}
                       </h2>
                     </div>
                     <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2 py-0.5 text-[0.65rem] uppercase tracking-wider text-gold-foreground">
-                      {receipt.status}
+                      {payout.status}
                     </span>
                   </div>
 
                   <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                    {receipt.service_name_snapshot || t("dashboard.customLineItems")}
+                    {payout.service_name_snapshot || t("dashboard.customLineItems")}
                   </p>
 
                   <div className="mt-2 flex items-center gap-2">
-                    <Link to="/managers/$id" params={{ id: receipt.user_id }} className="flex items-center gap-2 hover:underline">
+                    <Link to="/managers/$id" params={{ id: payout.user_id }} className="flex items-center gap-2 hover:underline">
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground uppercase">
-                        {receipt.creator?.full_name?.charAt(0) || "?"}
+                        {payout.creator?.full_name?.charAt(0) || "?"}
                       </div>
-                      <span className="text-xs text-muted-foreground">{receipt.creator?.full_name || "Unknown"}</span>
+                      <span className="text-xs text-muted-foreground">{payout.creator?.full_name || "Unknown"}</span>
                     </Link>
                   </div>
 
                   <dl className="mt-auto space-y-0.5 pt-3 text-sm">
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">{t("dashboard.date")}</dt>
-                      <dd>{formatDateLong(receipt.issue_date)}</dd>
+                      <dd>{formatDateLong(payout.issue_date)}</dd>
                     </div>
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">{t("dashboard.total")}</dt>
-                      <dd className="font-display text-base">{formatPence(receipt.total_pence)}</dd>
+                      <dd className="font-display text-base">{formatPence(payout.total_pence)}</dd>
                     </div>
                   </dl>
 
                   <div className="mt-3 flex gap-2 border-t border-border pt-3">
                     <Button asChild size="sm" variant="outline" className="flex-1">
-                      <Link to="/invoices/$id" params={{ id: receipt.id }}>
+                      <Link to="/payouts/$id" params={{ id: payout.id }}>
                         <Eye aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
                         {t("dashboard.view")}
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="secondary" className="flex-1">
                       <Link
-                        to="/invoices/$id"
-                        params={{ id: receipt.id }}
+                        to="/payouts/$id"
+                        params={{ id: payout.id }}
                         search={{ download: true }}
                       >
                         <Download aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
@@ -176,10 +176,10 @@ function DashboardPage() {
         <div className="surface-card mt-6 rounded-xl p-10 text-center">
           <FileText aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
           <h2 className="mt-4 font-display text-2xl">
-            {search ? t("dashboard.noReceiptsSearch") : t("dashboard.noReceipts")}
+            {search ? t("dashboard.noPayoutsSearch") : t("dashboard.noPayouts")}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            {search ? t("dashboard.noReceiptsSearchDesc") : t("dashboard.noReceiptsDesc")}
+            {search ? t("dashboard.noPayoutsSearchDesc") : t("dashboard.noPayoutsDesc")}
           </p>
         </div>
       ) : null}

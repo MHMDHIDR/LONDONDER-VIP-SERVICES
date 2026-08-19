@@ -77,6 +77,213 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_attachments: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          mime_type: string
+          payout_id: string
+          size_bytes: number
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          mime_type: string
+          payout_id: string
+          size_bytes: number
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          mime_type?: string
+          payout_id?: string
+          size_bytes?: number
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_attachments_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_counters: {
+        Row: {
+          last_number: number
+          user_id: string
+        }
+        Insert: {
+          last_number?: number
+          user_id: string
+        }
+        Update: {
+          last_number?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payout_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          line_total_pence: number
+          name: string
+          position: number
+          quantity: number
+          payout_id: string
+          unit_price_pence: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          line_total_pence: number
+          name: string
+          position?: number
+          quantity: number
+          payout_id: string
+          unit_price_pence: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          line_total_pence?: number
+          name?: string
+          position?: number
+          quantity?: number
+          payout_id?: string
+          unit_price_pence?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_items_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          business_name_snapshot: string | null
+          created_at: string
+          currency: string
+          worker_number_snapshot: number | null
+          worker_phone_snapshot: string | null
+          deleted_at: string | null
+          id: string
+          issue_date: string
+          logo_path_snapshot: string | null
+          notes: string | null
+          pa_order_id: string | null
+          pdf_path: string | null
+          payout_number: string
+          service_id: string | null
+          service_name_snapshot: string | null
+          status: string
+          subtotal_pence: number
+          total_pence: number
+          updated_at: string
+          user_id: string
+          updated_by: string | null
+          worker_id: string | null
+        }
+        Insert: {
+          business_name_snapshot?: string | null
+          created_at?: string
+          currency?: string
+          worker_number_snapshot?: number | null
+          worker_phone_snapshot?: string | null
+          deleted_at?: string | null
+          id?: string
+          issue_date?: string
+          logo_path_snapshot?: string | null
+          notes?: string | null
+          pa_order_id?: string | null
+          pdf_path?: string | null
+          payout_number: string
+          service_id?: string | null
+          service_name_snapshot?: string | null
+          status?: string
+          subtotal_pence?: number
+          total_pence?: number
+          updated_at?: string
+          user_id: string
+          updated_by?: string | null
+          worker_id?: string | null
+        }
+        Update: {
+          business_name_snapshot?: string | null
+          created_at?: string
+          currency?: string
+          worker_number_snapshot?: number | null
+          worker_phone_snapshot?: string | null
+          deleted_at?: string | null
+          id?: string
+          issue_date?: string
+          logo_path_snapshot?: string | null
+          notes?: string | null
+          pa_order_id?: string | null
+          pdf_path?: string | null
+          payout_number?: string
+          service_id?: string | null
+          service_name_snapshot?: string | null
+          status?: string
+          subtotal_pence?: number
+          total_pence?: number
+          updated_at?: string
+          user_id?: string
+          updated_by?: string | null
+          worker_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_creator_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_updater_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -414,11 +621,55 @@ export type Database = {
         }
         Relationships: []
       }
+      workers: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          updated_at: string
+          user_id: string
+          worker_number: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          updated_at?: string
+          user_id: string
+          worker_number?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+          worker_number?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_payout: {
+        Args: {
+          _issue_date: string
+          _items: Json
+          _notes: string
+          _pa_order_id?: string
+          _service_id: string
+          _worker_id: string
+        }
+        Returns: string
+      }
       create_receipt: {
         Args: {
           _customer_email: string

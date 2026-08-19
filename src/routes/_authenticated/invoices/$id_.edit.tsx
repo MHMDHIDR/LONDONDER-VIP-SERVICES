@@ -20,7 +20,9 @@ import {
   todayLocalISO,
 } from "@/lib/money";
 import { PageHeader } from "@/components/AppShell";
+import { DocumentSummary } from "@/components/DocumentSummary";
 import { CreateServiceDialog } from "@/components/CreateServiceDialog";
+import { NotesEvidenceSection } from "@/components/NotesEvidenceSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/receipts/$id_/edit")({
+export const Route = createFileRoute("/_authenticated/invoices/$id_/edit")({
   component: EditReceiptPage,
 });
 
@@ -447,22 +449,11 @@ function EditReceiptPage() {
             </ul>
           </section>
 
-          <section className="surface-card rounded-xl p-6">
-            <h2 className="font-display text-2xl">{t("receipt.notes")}</h2>
-            <div className="mt-5 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="notes">{t("receipt.notes")}</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  maxLength={2000}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="h-32 resize-none overflow-y-auto"
-                  placeholder={t("receipt.notesPlaceholder")}
-                />
-              </div>
-            </div>
-          </section>
+          <NotesEvidenceSection
+            notes={notes}
+            setNotes={setNotes}
+            t={t}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">

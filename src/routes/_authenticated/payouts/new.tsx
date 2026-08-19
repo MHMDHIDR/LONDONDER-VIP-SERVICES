@@ -6,8 +6,8 @@ import { Loader2, Plus, Trash2, Paperclip, Receipt as ReceiptIcon } from "lucide
 import {
   ATTACHMENT_MIME,
   MAX_ATTACHMENT_BYTES,
-  attachEvidence,
-  createReceipt,
+  attachPayoutEvidence,
+  createPayout,
   fetchServices,
   resolvePriceAt,
   type Service,
@@ -22,10 +22,13 @@ import {
   todayLocalISO,
 } from "@/lib/money";
 import { PageHeader } from "@/components/AppShell";
+import { DocumentSummary } from "@/components/DocumentSummary";
 import { CreateServiceDialog } from "@/components/CreateServiceDialog";
+import { NotesEvidenceSection } from "@/components/NotesEvidenceSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { WorkerSelect } from "@/components/WorkerSelect";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import {
@@ -36,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/receipts/new")({
+export const Route = createFileRoute("/_authenticated/payouts/new")({
   head: () => ({
     meta: [
       { title: "New receipt, Generative Receipts" },
@@ -51,40 +54,16 @@ export const Route = createFileRoute("/_authenticated/receipts/new")({
   component: NewReceiptPage,
 });
 
-type DraftItem = {
-  key: string;
-  name: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-};
-
-function emptyItem(): DraftItem {
-  return {
-    key: crypto.randomUUID(),
-    name: "",
-    description: "",
-    quantity: "1",
-    unitPrice: "",
-  };
-}
-
-function itemPence(item: DraftItem) {
-  const quantity = Number.parseFloat(item.quantity);
-  const unit = parsePoundsToPence(item.unitPrice) ?? 0;
-  if (!Number.isFinite(quantity) || quantity <= 0) return 0;
-  return lineTotalPence(quantity, unit);
-}
+import { LineItemsSection, type LineItem as DraftItem, emptyItem, itemPence } from "@/components/LineItemsSection";
 
 function NewReceiptPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const [issueDate, setIssueDate] = useState(todayLocalISO());
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
+  const [workerId, setWorkerId] = useState("");
+  const [workerPhone, setWorkerPhone] = useState("");
   const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
@@ -103,9 +82,7 @@ function NewReceiptPage() {
   const selectedService = (services ?? []).find((s) => s.id === serviceId) ?? null;
   const subtotal = sumPence(items.map(itemPence));
 
-  function patchItem(key: string, patch: Partial<DraftItem>) {
-    setItems((prev) => prev.map((item) => (item.key === key ? { ...item, ...patch } : item)));
-  }
+
 
   async function applyService(service: Service) {
     setServiceId(service.id);
@@ -164,10 +141,10 @@ function NewReceiptPage() {
         }))
         .filter((item) => item.name.length > 0);
 
-      const id = await createReceipt({
+      const id = await createPayout({
         issueDate,
-        customerName: customerName.trim() || null,
-        customerEmail: customerEmail.trim() || null,
+        workerId: workerId.trim() || null,
+        workerPhone: workerPhone.trim() || null,
         notes: notes.trim() || null,
         paOrderId: paOrderId.trim() || null,
         serviceId,
@@ -176,7 +153,7 @@ function NewReceiptPage() {
 
       if (file) {
         try {
-          await attachEvidence(id, file);
+          await attachPayoutEvidence(id, file);
         } catch (error) {
           toast.warning("Receipt saved, but evidence upload failed", {
             description: (error as Error).message,
@@ -199,7 +176,7 @@ function NewReceiptPage() {
     if (generate.isPending) return;
 
     if (!issueDate) return setFormError("Choose a receipt date.");
-    if (customerEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail.trim())) {
+    if (workerPhone.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(workerPhone.trim())) {
       return setFormError("Enter a valid customer email or leave it blank.");
     }
     const valid = items.filter((item) => item.name.trim());
@@ -277,22 +254,22 @@ function NewReceiptPage() {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-name">{t("receipt.customerNameOpt")}</Label>
+                <Label htmlFor="customer-name">{t("receipt.workerIdOpt")}</Label>
                 <Input
                   id="customer-name"
-                  value={customerName}
+                  value={workerId}
                   maxLength={160}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={(e) => setWorkerId(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customer-email">{t("receipt.customerEmailOpt")}</Label>
+                <Label htmlFor="customer-email">{t("receipt.workerPhoneOpt")}</Label>
                 <Input
                   id="customer-email"
                   type="email"
-                  value={customerEmail}
+                  value={workerPhone}
                   maxLength={254}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  onChange={(e) => setWorkerPhone(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -321,202 +298,43 @@ function NewReceiptPage() {
             </div>
           </section>
 
-          <section className="surface-card rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl">{t("receipt.lineItems")}</h2>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setItems((prev) => [...prev, emptyItem()])}
-              >
-                <Plus aria-hidden="true" className="h-4 w-4 rtl:rotate-180 me-2 ms-0" />
-                {t("receipt.addItem")}
-              </Button>
-            </div>
+          <LineItemsSection items={items} setItems={setItems} t={t} currency="GBP" />
 
-            <ul className="mt-5 space-y-4">
-              {items.map((item, index) => (
-                <li key={item.key} className="rounded-lg border border-border p-4">
-                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_6rem_8rem]">
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-name-${item.key}`}>
-                        {t("receipt.item")} {index + 1}
-                      </Label>
-                      <Input
-                        id={`item-name-${item.key}`}
-                        value={item.name}
-                        maxLength={200}
-                        placeholder={t("receipt.itemNamePlaceholder")}
-                        onChange={(e) => patchItem(item.key, { name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-qty-${item.key}`}>{t("receipt.qty")}</Label>
-                      <Input
-                        id={`item-qty-${item.key}`}
-                        inputMode="decimal"
-                        value={item.quantity}
-                        onChange={(e) => patchItem(item.key, { quantity: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-price-${item.key}`}>{t("receipt.unitPriceGbp")}</Label>
-                      <Input
-                        id={`item-price-${item.key}`}
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        value={item.unitPrice}
-                        onChange={(e) => patchItem(item.key, { unitPrice: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    <Label htmlFor={`item-desc-${item.key}`}>{t("receipt.description")}</Label>
-                    <Input
-                      id={`item-desc-${item.key}`}
-                      value={item.description}
-                      maxLength={1000}
-                      onChange={(e) => patchItem(item.key, { description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                    <p className="text-sm text-muted-foreground">
-                      {t("receipt.lineTotal")}{" "}
-                      <span className="font-medium text-foreground">
-                        {formatPence(itemPence(item))}
-                      </span>
-                    </p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      aria-label={`Remove item ${index + 1}`}
-                      disabled={items.length === 1}
-                      onClick={() => setItems((prev) => prev.filter((i) => i.key !== item.key))}
-                    >
-                      <Trash2 aria-hidden="true" className="h-4 w-4 me-2 ms-0" />
-                      {t("receipt.removeItem")}
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="surface-card rounded-xl p-6">
-            <h2 className="font-display text-2xl">{t("receipt.notesAndEvidence")}</h2>
-            <div className="mt-5 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="notes">{t("receipt.notes")}</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  maxLength={2000}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="h-32 resize-none overflow-y-auto"
-                  placeholder={t("receipt.notesPlaceholder")}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="evidence">{t("receipt.evidenceOpt")}</Label>
-                <input
-                  ref={fileRef}
-                  id="evidence"
-                  type="file"
-                  className="sr-only"
-                  accept={ATTACHMENT_MIME.join(",")}
-                  onChange={(e) => handleFile(e.target.files?.[0])}
-                />
-                <div className="flex flex-wrap items-center gap-3">
-                  <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
-                    <Paperclip aria-hidden="true" className="h-4 w-4 me-2 ms-0" />
-                    {t("receipt.chooseFile")}
-                  </Button>
-                  <p className="text-sm text-muted-foreground">
-                    {file ? file.name : "PNG, JPEG, WebP or PDF · up to 10 MB"}
-                  </p>
-                  {file ? (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)}>
-                      {t("receipt.clearFile")}
-                    </Button>
-                  ) : null}
-                </div>
-                {fileError ? (
-                  <p role="alert" className="text-sm text-destructive">
-                    {fileError}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          </section>
+          <NotesEvidenceSection
+            notes={notes}
+            setNotes={setNotes}
+            file={file}
+            setFile={setFile}
+            fileError={fileError}
+            handleFile={handleFile}
+            t={t}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="surface-card rounded-xl p-6">
-            <h2 className="font-display text-2xl">{t("receipt.summary")}</h2>
-            <dl className="mt-5 space-y-3 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">{t("receipt.receiptDate")}</dt>
-                <dd className="text-right">{formatDateLong(issueDate)}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">{t("receipt.client")}</dt>
-                <dd className="text-right">{customerName.trim() || "—"}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">{t("receipt.service")}</dt>
-                <dd className="text-right">
-                  {selectedService ? (
-                    <Link
-                      to="/services/$id"
-                      params={{ id: selectedService.id }}
-                      className="hover:underline"
-                    >
-                      {selectedService.name}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4 border-t border-border pt-3">
-                <dt className="text-muted-foreground">{t("receipt.subtotal")}</dt>
-                <dd>{formatPence(subtotal)}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="font-medium">{t("receipt.totalGbp")}</dt>
-                <dd className="font-display text-3xl">{formatPence(subtotal)}</dd>
-              </div>
-            </dl>
-
+          <DocumentSummary
+            date={issueDate}
+            recipientLabel={t("receipt.client")}
+            recipientName={workerId}
+            serviceName={
+              selectedService ? (
+                <Link to="/services/$id" params={{ id: selectedService.id }} className="hover:underline">
+                  {selectedService.name}
+                </Link>
+              ) : null
+            }
+            subtotal={subtotal}
+            isPending={generate.isPending}
+            submitLabel={generate.isPending ? t("receipt.generating") : t("receipt.generateReceipt")}
+            warningText={t("receipt.lockedWarning")}
+            t={t}
+          >
             {formError ? (
               <p role="alert" className="mt-4 text-sm text-destructive">
                 {formError}
               </p>
             ) : null}
-
-            <Button
-              type="submit"
-              variant="premium"
-              size="lg"
-              className="mt-6 w-full"
-              disabled={generate.isPending}
-            >
-              {generate.isPending ? (
-                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin me-2 ms-0" />
-              ) : (
-                <ReceiptIcon aria-hidden="true" className="h-4 w-4 me-2 ms-0" />
-              )}
-              {generate.isPending ? t("receipt.generating") : t("receipt.generateReceipt")}
-            </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("receipt.lockedWarning")}
-            </p>
-          </div>
+          </DocumentSummary>
         </aside>
       </form>
 

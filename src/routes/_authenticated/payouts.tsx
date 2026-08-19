@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const PAGE_SIZE = 11;
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/payouts")({
   head: () => ({
     meta: [
       { title: "Dashboard, Generative Invoices" },

@@ -77,11 +77,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Generative Receipts, Concierge Receipt Studio" },
+      { title: "Generative Invoices, Concierge Invoice Studio" },
       {
         name: "description",
         content:
-          "Generate, store and share premium GBP receipts for concierge and business services.",
+          "Generate, store and share premium GBP invoices for concierge and business services.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

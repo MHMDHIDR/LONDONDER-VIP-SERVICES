@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutGrid, Settings, Sparkles, LogOut, Menu, X, Users } from "lucide-react";
+import { LayoutGrid, Settings, Sparkles, LogOut, Menu, X, Users, Banknote, HardHat } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchBusinessSettings, signedUrl, LOGO_BUCKET } from "@/lib/api";
@@ -18,8 +18,12 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
 
   const NAV_ITEMS = [
     { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutGrid },
+    { label: t("nav.payouts"), to: "/payouts", icon: Banknote },
     { label: t("nav.services"), to: "/services", icon: Sparkles },
-    ...(profile?.is_admin ? [{ label: t("nav.managers"), to: "/managers", icon: Users }] : []),
+    ...(profile?.is_admin ? [
+      { label: t("nav.managers"), to: "/managers", icon: Users },
+      { label: t("nav.workers"), to: "/workers", icon: HardHat },
+    ] : []),
     { label: t("nav.settings"), to: "/settings", icon: Settings },
   ] as const;
 
@@ -62,10 +66,10 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
             )}
             <span className="flex flex-col leading-tight">
               <span className="font-display text-lg">
-                {settings?.business_name || "Generative Receipts"}
+                {settings?.business_name || "Generative Invoices"}
               </span>
               <span className="text-[0.6rem] uppercase tracking-[0.22em] text-gold">
-                Generative Receipts
+                Generative Invoices
               </span>
             </span>
           </Link>
