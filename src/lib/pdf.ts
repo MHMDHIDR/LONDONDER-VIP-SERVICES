@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { formatDateLong, formatPence } from "./money";
+import { fetchBusinessSettings } from "./api";
 import type { Receipt, ReceiptItem } from "./api";
 import type { Payout, PayoutItem } from "./payouts-api";
 
@@ -49,10 +50,12 @@ type PayoutArgs = {
 };
 
 export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<Blob> {
+  const settings = await fetchBusinessSettings();
   const { type, items } = args;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
   const docData = type === "invoice" ? args.receipt : args.payout;
+  const businessName = settings?.business_name || docData.business_name_snapshot || "Londoner VIP Services";
 
   const logo = args.logoUrl ? await loadImageDataUrl(args.logoUrl) : null;
   if (logo) {
@@ -93,7 +96,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   doc.setTextColor(...INK);
   doc.setFont("times", "bold");
   doc.setFontSize(22);
-  doc.text(docData.business_name_snapshot || (isInvoice ? "Invoice" : "Payout"), MARGIN, y + 2);
+  doc.text(businessName || (isInvoice ? "Invoice" : "Payout"), MARGIN, y + 2);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -209,7 +212,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   const documentNumber = isInvoice ? args.receipt.receipt_number : args.payout.payout_number;
 
   if (!isInvoice) {
-    const businessName = docData.business_name_snapshot || "The Company";
+     
     const disclaimer = `As an independent contractor, you are solely responsible for declaring and paying your own tax and National Insurance contributions. ${businessName} accepts no liability for your tax affairs.`;
     
     doc.setFontSize(7);
@@ -226,7 +229,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
-    `${docData.business_name_snapshot || ""} · ${documentNumber || ""} · All amounts in GBP`.trim(),
+    `${businessName || ""} · ${documentNumber || ""} · All amounts in GBP`.trim(),
     PAGE_WIDTH / 2,
     PAGE_HEIGHT - 12,
     { align: "center" },

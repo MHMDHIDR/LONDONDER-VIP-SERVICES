@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2, Pencil } from "lucide-react";
-import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt, LOGO_BUCKET } from "@/lib/api";
+import { fetchReceipt, signedUrl, storeReceiptPdf, softDeleteReceipt, LOGO_BUCKET, fetchBusinessSettings } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -38,6 +38,8 @@ export const Route = createFileRoute("/_authenticated/invoices/$id")({
 });
 
 function ReceiptPage() {
+  const { data: settings } = useQuery({ queryKey: ["business-settings"], queryFn: fetchBusinessSettings });
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = Route.useParams();
@@ -348,7 +350,7 @@ function ReceiptPage() {
         </section>
 
         <div className="mt-8 overflow-x-auto w-full">
-          <table className="w-full text-sm min-w-[600px] text-left">
+          <table className="w-full text-sm min-w-150 text-left">
             <caption className="sr-only">Receipt line items</caption>
           <thead>
             <tr className="border-b border-border text-start">
@@ -375,13 +377,13 @@ function ReceiptPage() {
                     <span className="block text-muted-foreground">{item.description}</span>
                   ) : null}
                 </td>
-                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[80px]">
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-20">
                   {item.quantity}
                 </td>
-                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-25">
                   {formatPence(item.unit_price_pence)}
                 </td>
-                <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-25">
                   {formatPence(item.line_total_pence)}
                 </td>
               </tr>

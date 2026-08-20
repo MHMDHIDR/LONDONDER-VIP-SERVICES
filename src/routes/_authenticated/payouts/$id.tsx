@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, Mail, Share2, MessageCircle, Trash2, Pencil } from "lucide-react";
-import { signedUrl, LOGO_BUCKET } from "@/lib/api";
+import { signedUrl, LOGO_BUCKET, fetchBusinessSettings } from "@/lib/api";
 import { fetchPayout, softDeletePayout, storePayoutPdf } from "@/lib/payouts-api";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -39,6 +39,8 @@ export const Route = createFileRoute("/_authenticated/payouts/$id")({
 });
 
 function PayoutPage() {
+  const { data: settings } = useQuery({ queryKey: ["business-settings"], queryFn: fetchBusinessSettings });
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = Route.useParams();
@@ -415,7 +417,7 @@ function PayoutPage() {
 
         <section className="mt-8 pt-8">
           <p className="text-center text-xs text-muted-foreground/60 max-w-2xl mx-auto">
-            As an independent contractor, you are solely responsible for declaring and paying your own tax and National Insurance contributions. {payout.business_name_snapshot || "The Company"} accepts no liability for your tax affairs.
+            As an independent contractor, you are solely responsible for declaring and paying your own tax and National Insurance contributions. {settings?.business_name || payout.business_name_snapshot || "Londoner VIP Services"} accepts no liability for your tax affairs.
           </p>
         </section>
       </article>
