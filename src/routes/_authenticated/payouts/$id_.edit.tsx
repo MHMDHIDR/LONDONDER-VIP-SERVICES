@@ -183,10 +183,10 @@ function EditPayoutPage() {
       const payload = items
         .filter((item) => item.name.trim().length > 0)
         .map((item) => ({
-          description: [item.name.trim().slice(0, 200), item.description.trim().slice(0, 1000)]
-            .filter(Boolean)
-            .join(" \u2013 "),
-          amount_pence: itemPence(item),
+          name: item.name.trim().slice(0, 200),
+          description: item.description.trim().slice(0, 1000),
+          quantity: Number.parseFloat(item.quantity) || 1,
+          unit_price_pence: parsePoundsToPence(item.unitPrice) ?? 0,
         }));
 
       await updatePayout(
