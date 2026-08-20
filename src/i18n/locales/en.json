@@ -197,6 +197,7 @@
     "addWorkerDescription": "Create a new worker profile. A unique worker number will be automatically assigned.",
     "workerName": "Worker name",
     "workerPhone": "Worker phone number",
+    "workerNin": "National Insurance Number (NIN)",
     "workerNumber": "Worker number",
     "existingWorkers": "Existing Workers",
     "manage": "Manage",

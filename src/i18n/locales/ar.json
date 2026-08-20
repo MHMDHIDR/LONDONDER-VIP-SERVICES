@@ -197,6 +197,7 @@
     "addWorkerDescription": "إنشاء ملف تعريف عامل جديد. سيتم تعيين رقم عامل فريد تلقائياً.",
     "workerName": "اسم العامل",
     "workerPhone": "رقم هاتف العامل",
+    "workerNin": "رقم التأمين الوطني (NIN)",
     "workerNumber": "رقم العامل",
     "existingWorkers": "العمال الحاليون",
     "manage": "إدارة",
