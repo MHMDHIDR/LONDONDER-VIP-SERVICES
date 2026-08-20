@@ -412,6 +412,12 @@ function PayoutPage() {
             </p>
           </section>
         ) : null}
+
+        <section className="mt-8 pt-8">
+          <p className="text-center text-xs text-muted-foreground/60 max-w-2xl mx-auto">
+            As an independent contractor, you are solely responsible for declaring and paying your own tax and National Insurance contributions. {payout.business_name_snapshot || "The Company"} accepts no liability for your tax affairs.
+          </p>
+        </section>
       </article>
     </>
   );

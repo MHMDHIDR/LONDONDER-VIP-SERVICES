@@ -209,12 +209,16 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   const documentNumber = isInvoice ? args.receipt.receipt_number : args.payout.payout_number;
 
   if (!isInvoice) {
+    const businessName = docData.business_name_snapshot || "The Company";
+    const disclaimer = `As an independent contractor, you are solely responsible for declaring and paying your own tax and National Insurance contributions. ${businessName} accepts no liability for your tax affairs.`;
+    
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150); // Light color
+    const wrappedDisclaimer = doc.splitTextToSize(disclaimer, PAGE_WIDTH - MARGIN * 2);
     doc.text(
-      "As an independent contractor, you are responsible for your own tax and National Insurance contributions.",
+      wrappedDisclaimer,
       PAGE_WIDTH / 2,
-      PAGE_HEIGHT - 20,
+      PAGE_HEIGHT - 22,
       { align: "center" }
     );
   }
