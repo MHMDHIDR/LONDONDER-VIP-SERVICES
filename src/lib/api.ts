@@ -232,7 +232,12 @@ export async function resolvePriceAt(serviceId: string, atISO: string): Promise<
 
 /* -------------------------------- receipts -------------------------------- */
 
-export type ReceiptPage = { rows: any[]; total: number };
+export type ReceiptWithRelations = Receipt & {
+  creator?: { id: string; full_name: string | null; email: string | null } | null;
+  updater?: { id: string; full_name: string | null; email: string | null } | null;
+};
+
+export type ReceiptPage = { rows: ReceiptWithRelations[]; total: number };
 
 export async function fetchReceipts(opts: {
   search: string;
@@ -270,7 +275,7 @@ export async function fetchReceipt(id: string): Promise<{
 } | null> {
   const receipt = unwrap(
     await supabase.from("receipts").select("*, creator:profiles!receipts_creator_fkey(id, full_name, email), updater:profiles!receipts_updater_fkey(id, full_name, email)").eq("id", id).maybeSingle(),
-  ) as any | null;
+  ) as ReceiptWithRelations | null;
   if (!receipt) return null;
   const items =
     (unwrap(

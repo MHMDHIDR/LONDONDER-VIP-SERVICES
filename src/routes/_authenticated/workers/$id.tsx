@@ -40,6 +40,7 @@ function WorkerEditPage() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [nin, setNin] = useState("");
   const [active, setActive] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,7 @@ function WorkerEditPage() {
     if (worker) {
       setName(worker.name);
       setPhone(worker.phone || "");
+      setNin(worker.nin || "");
       setActive(worker.active);
     }
   }, [worker]);
@@ -79,7 +81,8 @@ function WorkerEditPage() {
           id,
           patch: {
             name,
-            phone: phone || null,
+            phone: phone || undefined,
+            nin: nin || undefined,
             active,
           },
         },
@@ -162,6 +165,16 @@ function WorkerEditPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
+              <Input
+                id="nin"
+                value={nin}
+                onChange={(e) => setNin(e.target.value.toUpperCase())}
+                placeholder="e.g. QQ 12 34 56 A"
+              />
+            </div>
+
             <div className="flex items-center justify-between rounded-lg border border-border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="active">{t("workers.activeStatus")}</Label>
@@ -200,7 +213,7 @@ function WorkerEditPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : payouts.length > 0 ? (
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-100 overflow-y-auto pr-2">
               {payouts.map((payout) => (
                 <Link
                   key={payout.id}
@@ -215,7 +228,7 @@ function WorkerEditPage() {
                     <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatDateLong(payout.issue_date, "en-GB")}
+                    {formatDateLong(payout.issue_date)}
                   </p>
                 </Link>
               ))}

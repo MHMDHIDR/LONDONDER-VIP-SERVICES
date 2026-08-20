@@ -26,7 +26,7 @@ export async function fetchWorker(id: string): Promise<Worker | null> {
   return unwrap(res) ?? null;
 }
 
-export async function createWorker(input: { data: { name: string; phone?: string | null } }) {
+export async function createWorker(input: { data: { name: string; phone?: string; nin?: string } }) {
   const userId = await requireUserId();
   const res = await supabase
     .from("workers")
@@ -34,23 +34,24 @@ export async function createWorker(input: { data: { name: string; phone?: string
       user_id: userId,
       name: input.data.name.trim(),
       phone: input.data.phone?.trim() || "",
+      nin: input.data.nin?.trim() || null,
     })
     .select("*")
     .single();
 
-  if (res.error) throw new Error(res.error.message);
-  return res.data as Worker;
+  return unwrap(res);
 }
 
 export async function updateWorker(input: {
   data: {
     id: string;
-    patch: { name?: string; phone?: string | null; active?: boolean };
+    patch: { name?: string; phone?: string; active?: boolean; nin?: string };
   };
 }) {
-  const patch: any = { ...input.data.patch };
+  const patch = { ...input.data.patch };
   if (typeof patch.name === "string") patch.name = patch.name.trim();
   if (typeof patch.phone === "string") patch.phone = patch.phone.trim();
+  if (typeof patch.nin === "string") patch.nin = patch.nin.trim();
   
   const res = await supabase
     .from("workers")

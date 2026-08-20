@@ -5,6 +5,12 @@ export type Payout = Tables<"payouts">;
 export type PayoutItem = Tables<"payout_items">;
 export type PayoutAttachment = Tables<"payout_attachments">;
 
+export type PayoutWithRelations = Payout & {
+  worker?: { id: string; name: string } | null;
+  creator?: { id: string; full_name: string | null; email: string | null } | null;
+  updater?: { id: string; full_name: string | null; email: string | null } | null;
+};
+
 export const PAYOUT_ATTACHMENT_BUCKET = "payout-attachments";
 export const PAYOUT_PDF_BUCKET = "payout-pdfs";
 
@@ -13,7 +19,7 @@ function unwrap<T>(res: { data: T | null; error: { message: string } | null }): 
   return res.data as T;
 }
 
-export type PayoutPage = { rows: any[]; total: number };
+export type PayoutPage = { rows: PayoutWithRelations[]; total: number };
 
 export async function fetchPayouts(opts: {
   search: string;
@@ -44,7 +50,7 @@ export async function fetchPayouts(opts: {
 }
 
 export async function fetchPayout(id: string): Promise<{
-  payout: Payout;
+  payout: PayoutWithRelations;
   items: PayoutItem[];
   attachments: PayoutAttachment[];
 } | null> {
@@ -54,7 +60,7 @@ export async function fetchPayout(id: string): Promise<{
       .select("*, worker:workers(id, name), creator:profiles!payouts_creator_fkey(id, full_name, email), updater:profiles!payouts_updater_fkey(id, full_name, email)")
       .eq("id", id)
       .maybeSingle(),
-  ) as any | null;
+  ) as PayoutWithRelations | null;
   
   if (!payout) return null;
   
@@ -100,7 +106,7 @@ export async function createPayout(input: {
   if (input.serviceId) params._service_id = input.serviceId;
   if (input.paOrderId) params._pa_order_id = input.paOrderId;
 
-  const { data, error } = await supabase.rpc("create_payout", params as any);
+  const { data, error } = await supabase.rpc("create_payout", params as unknown as never);
   if (error) throw new Error(error.message);
   return data as string;
 }

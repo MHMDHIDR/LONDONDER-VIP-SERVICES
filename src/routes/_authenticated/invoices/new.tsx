@@ -164,7 +164,7 @@ function NewReceiptPage() {
     onSuccess: (id) => {
       toast.success("Receipt generated");
       queryClient.invalidateQueries({ queryKey: ["receipts"] });
-      navigate({ to: "/receipts/$id", params: { id } });
+      navigate({ to: "/invoices/$id", params: { id } });
     },
     onError: (error: Error) => setFormError(error.message),
   });

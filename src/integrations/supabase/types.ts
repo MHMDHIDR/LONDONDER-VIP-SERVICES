@@ -187,6 +187,7 @@ export type Database = {
           currency: string
           worker_number_snapshot: number | null
           worker_phone_snapshot: string | null
+          worker_nin_snapshot: string | null
           deleted_at: string | null
           id: string
           issue_date: string
@@ -211,6 +212,7 @@ export type Database = {
           currency?: string
           worker_number_snapshot?: number | null
           worker_phone_snapshot?: string | null
+          worker_nin_snapshot?: string | null
           deleted_at?: string | null
           id?: string
           issue_date?: string
@@ -235,6 +237,7 @@ export type Database = {
           currency?: string
           worker_number_snapshot?: number | null
           worker_phone_snapshot?: string | null
+          worker_nin_snapshot?: string | null
           deleted_at?: string | null
           id?: string
           issue_date?: string
@@ -629,6 +632,7 @@ export type Database = {
           id: string
           name: string
           phone: string
+          nin: string | null
           updated_at: string
           user_id: string
           worker_number: number
@@ -640,6 +644,7 @@ export type Database = {
           id?: string
           name: string
           phone: string
+          nin?: string | null
           updated_at?: string
           user_id: string
           worker_number?: number
@@ -651,6 +656,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+          nin?: string | null
           updated_at?: string
           user_id?: string
           worker_number?: number

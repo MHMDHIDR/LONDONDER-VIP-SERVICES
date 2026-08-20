@@ -36,7 +36,7 @@ export function DocumentSummary({
       <dl className="mt-5 space-y-3 text-sm">
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">{t("receipt.receiptDate")}</dt>
-          <dd className="text-right">{formatDateLong(date)}</dd>
+          <dd className="text-right">{formatDateLong(typeof date === "string" ? date : date.toISOString())}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-muted-foreground">{recipientLabel}</dt>

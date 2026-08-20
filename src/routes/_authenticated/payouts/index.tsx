@@ -117,7 +117,7 @@ function PayoutsDashboardPage() {
                     <div>
                       <p className="text-eyebrow">{payout.payout_number}</p>
                       <h2 className="mt-1 font-display text-lg leading-tight">
-                        {payout.customer_name || t("payoutsDashboard.noCustomer")}
+                        {payout.worker?.name || t("payoutsDashboard.noWorker", "No Worker")}
                       </h2>
                     </div>
                     <span className="rounded-full border border-gold/40 bg-gold-soft/40 px-2 py-0.5 text-[0.65rem] uppercase tracking-wider text-gold-foreground">

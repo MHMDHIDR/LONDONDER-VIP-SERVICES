@@ -26,6 +26,7 @@ export function CreateWorkerSheet({ open, onOpenChange, onSuccess }: CreateWorke
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [nin, setNin] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
@@ -36,7 +37,7 @@ export function CreateWorkerSheet({ open, onOpenChange, onSuccess }: CreateWorke
       onSuccess(newWorker);
       handleOpenChange(false);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       setError(err.message || "Failed to create worker");
     },
   });
@@ -45,6 +46,7 @@ export function CreateWorkerSheet({ open, onOpenChange, onSuccess }: CreateWorke
     if (!newOpen) {
       setName("");
       setPhone("");
+      setNin("");
       setError(null);
       mutation.reset();
     }
@@ -55,7 +57,7 @@ export function CreateWorkerSheet({ open, onOpenChange, onSuccess }: CreateWorke
     e.preventDefault();
     setError(null);
     if (!name.trim()) return setError("Worker name is required");
-    mutation.mutate({ data: { name: name.trim(), phone: phone.trim() || null } });
+    mutation.mutate({ data: { name: name.trim(), phone: phone.trim() || undefined, nin: nin.trim() || undefined } });
   }
 
   return (
@@ -84,7 +86,16 @@ export function CreateWorkerSheet({ open, onOpenChange, onSuccess }: CreateWorke
               id="worker-phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder={t("workers.workerPhone") || "Phone number"}
+              placeholder={t("workers.phonePlaceholder") || "Phone number"}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
+            <Input
+              id="worker-nin"
+              value={nin}
+              onChange={(e) => setNin(e.target.value.toUpperCase())}
+              placeholder={t("workers.ninPlaceholder") || "e.g. QQ 12 34 56 A"}
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}

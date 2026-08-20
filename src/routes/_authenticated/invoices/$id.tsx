@@ -239,7 +239,7 @@ function ReceiptPage() {
             </a>
           </Button>
           <Button asChild variant="outline" className="gap-2 rounded-full px-6 text-[15px]">
-            <Link to="/receipts/$id/edit" params={{ id }}>
+            <Link to="/invoices/$id/edit" params={{ id }}>
               <Pencil aria-hidden="true" className="h-4 w-4 ms-0 me-2" />
               Edit
             </Link>

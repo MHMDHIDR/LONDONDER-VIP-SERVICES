@@ -101,6 +101,7 @@ function EditPayoutPage() {
   const [workerId, setWorkerId] = useState("");
   const [workerName, setWorkerName] = useState("");
   const [workerPhone, setWorkerPhone] = useState("");
+  const [workerNin, setWorkerNin] = useState("");
   const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
@@ -115,6 +116,7 @@ function EditPayoutPage() {
       setWorkerId(payout.worker_id || "");
       setWorkerName((payout as any).worker?.name || "");
       setWorkerPhone(payout.worker_phone_snapshot || "");
+      setWorkerNin(payout.worker_nin_snapshot || "");
       setPaOrderId(payout.pa_order_id || "");
       setNotes(payout.notes || "");
       setServiceId(payout.service_id || null);
@@ -195,6 +197,7 @@ function EditPayoutPage() {
           issue_date: issueDate,
           worker_id: workerId.trim() || null,
           worker_phone_snapshot: workerPhone.trim() || null,
+          worker_nin_snapshot: workerNin.trim() || null,
           notes: notes.trim() || null,
           pa_order_id: paOrderId.trim() || null,
           service_id: serviceId,
@@ -325,14 +328,24 @@ function EditPayoutPage() {
                   setWorkerId(w.id);
                   setWorkerPhone(w.phone || "");
                   setWorkerName(w.name || "");
+                  setWorkerNin(w.nin || "");
                 }}
                 t={t}
               />
               <div className="space-y-2">
-                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
+                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label>
                 <Input
                   id="worker-phone"
                   value={workerPhone}
+                  readOnly
+                  disabled
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
+                <Input
+                  id="worker-nin"
+                  value={workerNin}
                   readOnly
                   disabled
                 />

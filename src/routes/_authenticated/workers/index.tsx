@@ -50,7 +50,7 @@ function WorkersPage() {
       await createWorker({
         data: {
           name,
-          phone: phone || null,
+          phone: phone || undefined,
         },
       });
       toast.success(t("workers.addWorker"), {

@@ -169,8 +169,8 @@ function PayoutPage() {
       await softDeletePayout(payout.id, payout.pdf_path);
       toast.success(t("payout.deleted"));
       navigate({ to: "/dashboard" });
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete payout");
+    } catch (err) {
+      toast.error((err as Error).message || "Failed to delete payout");
       setIsDeleting(false);
     }
   }
@@ -231,7 +231,7 @@ function PayoutPage() {
           </Button>
           <Button asChild variant="outline">
             <a
-              href={`mailto:${encodeURIComponent(payout.customer_email ?? "")}?subject=${encodeURIComponent(
+              href={`mailto:?subject=${encodeURIComponent(
                 `Payout ${payout.payout_number}`,
               )}&body=${encodeURIComponent(shareText)}`}
             >
@@ -277,13 +277,13 @@ function PayoutPage() {
           {payout.updated_at && payout.created_at && payout.updated_at !== payout.created_at ? (
             <>
               Last updated at {formatDateLong(payout.updated_at)} by{" "}
-              {(payout as any).updater?.full_name ? (
+              {payout.updater?.full_name ? (
                 <Link to="/managers/$id" params={{ id: payout.updated_by || "" }} className="hover:underline text-foreground">
-                  {(payout as any).updater.full_name}
+                  {payout.updater.full_name}
                 </Link>
-              ) : (payout as any).creator?.full_name ? (
+              ) : payout.creator?.full_name ? (
                 <Link to="/managers/$id" params={{ id: payout.updated_by || payout.user_id || "" }} className="hover:underline text-foreground">
-                  {(payout as any).creator.full_name}
+                  {payout.creator.full_name}
                 </Link>
               ) : (
                 "Unknown"
@@ -292,9 +292,9 @@ function PayoutPage() {
           ) : (
             <>
               Created at {formatDateLong(payout.created_at || payout.updated_at)} by{" "}
-              {(payout as any).creator?.full_name ? (
+              {payout.creator?.full_name ? (
                 <Link to="/managers/$id" params={{ id: payout.user_id || "" }} className="hover:underline text-foreground">
-                  {(payout as any).creator.full_name}
+                  {payout.creator.full_name}
                 </Link>
               ) : (
                 "Unknown"
@@ -329,10 +329,10 @@ function PayoutPage() {
 
         <section className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-eyebrow">{t("payout.billedTo")}</p>
-            <p className="mt-1 font-medium">{payout.customer_name || "—"}</p>
-            {payout.customer_email ? (
-              <p className="text-sm text-muted-foreground">{payout.customer_email}</p>
+            <p className="text-eyebrow">Worker</p>
+            <p className="mt-1 font-medium">{payout.worker?.name || "—"}</p>
+            {payout.worker_nin_snapshot ? (
+              <p className="text-sm text-muted-foreground">NIN: {payout.worker_nin_snapshot}</p>
             ) : null}
           </div>
           <div className="sm:text-end">
@@ -349,7 +349,7 @@ function PayoutPage() {
         </section>
 
         <div className="mt-8 overflow-x-auto w-full">
-          <table className="w-full text-sm min-w-[600px] text-left">
+          <table className="w-full text-sm min-w-150 text-left">
             <caption className="sr-only">Payout line items</caption>
           <thead>
             <tr className="border-b border-border text-start">
@@ -376,13 +376,13 @@ function PayoutPage() {
                     <span className="block text-muted-foreground">{item.description}</span>
                   ) : null}
                 </td>
-                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[80px]">
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-20">
                   {item.quantity}
                 </td>
-                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                <td className="py-4 px-4 text-right align-top whitespace-nowrap min-w-25">
                   {formatPence(item.unit_price_pence)}
                 </td>
-                <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-[100px]">
+                <td className="py-4 ps-4 text-right align-top whitespace-nowrap min-w-25">
                   {formatPence(item.line_total_pence)}
                 </td>
               </tr>

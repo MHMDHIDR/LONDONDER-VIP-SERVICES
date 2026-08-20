@@ -64,6 +64,7 @@ function NewReceiptPage() {
   const [workerId, setWorkerId] = useState("");
   const [workerName, setWorkerName] = useState("");
   const [workerPhone, setWorkerPhone] = useState("");
+  const [workerNin, setWorkerNin] = useState("");
   const [paOrderId, setPaOrderId] = useState("");
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
@@ -255,14 +256,24 @@ function NewReceiptPage() {
                   setWorkerId(w.id);
                   setWorkerPhone(w.phone || "");
                   setWorkerName(w.name || "");
+                  setWorkerNin(w.nin || "");
                 }}
                 t={t}
               />
               <div className="space-y-2">
-                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel")}</Label>
+                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label>
                 <Input
                   id="worker-phone"
                   value={workerPhone}
+                  readOnly
+                  disabled
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
+                <Input
+                  id="worker-nin"
+                  value={workerNin}
                   readOnly
                   disabled
                 />

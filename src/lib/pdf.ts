@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import { formatDateLong, formatPence } from "./money";
 import type { Receipt, ReceiptItem } from "./api";
+import type { Payout, PayoutItem } from "./payouts-api";
 
 const MARGIN = 18;
 const PAGE_WIDTH = 210;
@@ -33,15 +34,25 @@ async function loadImageDataUrl(url: string): Promise<{ data: string; ratio: num
   }
 }
 
-export async function buildDocumentPdf(args: {
-  type: "invoice" | "payout";
+type InvoiceArgs = {
+  type: "invoice";
   receipt: Receipt;
   items: ReceiptItem[];
   logoUrl?: string | null;
-}): Promise<Blob> {
-  const { type, receipt, items } = args;
+};
+
+type PayoutArgs = {
+  type: "payout";
+  payout: Payout & { worker?: { name: string } | null };
+  items: PayoutItem[];
+  logoUrl?: string | null;
+};
+
+export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<Blob> {
+  const { type, items } = args;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
+  const docData = type === "invoice" ? args.receipt : args.payout;
 
   const logo = args.logoUrl ? await loadImageDataUrl(args.logoUrl) : null;
   if (logo) {
@@ -82,7 +93,7 @@ export async function buildDocumentPdf(args: {
   doc.setTextColor(...INK);
   doc.setFont("times", "bold");
   doc.setFontSize(22);
-  doc.text(receipt.business_name_snapshot || (isInvoice ? "Invoice" : "Payout"), MARGIN, y + 2);
+  doc.text(docData.business_name_snapshot || (isInvoice ? "Invoice" : "Payout"), MARGIN, y + 2);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -91,7 +102,8 @@ export async function buildDocumentPdf(args: {
   doc.setFontSize(13);
   doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");
-  doc.text(receipt.receipt_number, PAGE_WIDTH - MARGIN, y + 2, { align: "right" });
+  const topNumber = isInvoice ? args.receipt.receipt_number : args.payout.payout_number;
+  doc.text(topNumber, PAGE_WIDTH - MARGIN, y + 2, { align: "right" });
 
   y += 8;
   doc.setDrawColor(...GOLD);
@@ -107,19 +119,22 @@ export async function buildDocumentPdf(args: {
   y += 5;
   doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(receipt.customer_name || "—", MARGIN, y);
-  doc.text(formatDateLong(receipt.issue_date), PAGE_WIDTH / 2 + 10, y);
-  if (receipt.customer_email) {
+  const recipientName = isInvoice ? args.receipt.customer_name : (args.payout.worker?.name || "—");
+  const recipientSubtitle = isInvoice ? args.receipt.customer_email : (args.payout.worker_nin_snapshot ? `NIN: ${args.payout.worker_nin_snapshot}` : "");
+
+  doc.text(recipientName || "—", MARGIN, y);
+  doc.text(formatDateLong(docData.issue_date), PAGE_WIDTH / 2 + 10, y);
+  if (recipientSubtitle) {
     y += 5;
     doc.setFontSize(9);
     doc.setTextColor(...MUTED);
-    doc.text(receipt.customer_email, MARGIN, y);
+    doc.text(recipientSubtitle, MARGIN, y);
   }
-  if (receipt.service_name_snapshot) {
+  if (docData.service_name_snapshot) {
     y += 6;
     doc.setFontSize(9);
     doc.setTextColor(...MUTED);
-    doc.text(`Service: ${receipt.service_name_snapshot}`, MARGIN, y);
+    doc.text(`Service: ${docData.service_name_snapshot}`, MARGIN, y);
   }
 
   y += 12;
@@ -168,7 +183,7 @@ export async function buildDocumentPdf(args: {
   doc.setTextColor(...MUTED);
   doc.text("Subtotal", labelX, y, { align: "right" });
   doc.setTextColor(...INK);
-  doc.text(formatPence(receipt.subtotal_pence), PAGE_WIDTH - MARGIN - 3, y, { align: "right" });
+  doc.text(formatPence(docData.subtotal_pence), PAGE_WIDTH - MARGIN - 3, y, { align: "right" });
   y += 8;
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.6);
@@ -176,9 +191,9 @@ export async function buildDocumentPdf(args: {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.text("Total (GBP)", labelX, y + 1, { align: "right" });
-  doc.text(formatPence(receipt.total_pence), PAGE_WIDTH - MARGIN - 3, y + 1, { align: "right" });
+  doc.text(formatPence(docData.total_pence), PAGE_WIDTH - MARGIN - 3, y + 1, { align: "right" });
 
-  if (receipt.notes) {
+  if (docData.notes) {
     y += 16;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -187,14 +202,27 @@ export async function buildDocumentPdf(args: {
     y += 5;
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
-    const noteLines = doc.splitTextToSize(receipt.notes, PAGE_WIDTH - MARGIN * 2) as string[];
+    const noteLines = doc.splitTextToSize(docData.notes, PAGE_WIDTH - MARGIN * 2) as string[];
     doc.text(noteLines, MARGIN, y);
+  }
+
+  const documentNumber = isInvoice ? args.receipt.receipt_number : args.payout.payout_number;
+
+  if (!isInvoice) {
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150); // Light color
+    doc.text(
+      "As an independent contractor, you are responsible for your own tax and National Insurance contributions.",
+      PAGE_WIDTH / 2,
+      PAGE_HEIGHT - 20,
+      { align: "center" }
+    );
   }
 
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
-    `${receipt.business_name_snapshot || ""} · ${receipt.receipt_number} · All amounts in GBP`.trim(),
+    `${docData.business_name_snapshot || ""} · ${documentNumber || ""} · All amounts in GBP`.trim(),
     PAGE_WIDTH / 2,
     PAGE_HEIGHT - 12,
     { align: "center" },
@@ -203,11 +231,11 @@ export async function buildDocumentPdf(args: {
   return doc.output("blob");
 }
 
-export async function buildInvoicePdf(args: Omit<Parameters<typeof buildDocumentPdf>[0], "type">) {
+export async function buildInvoicePdf(args: Omit<InvoiceArgs, "type">) {
   return buildDocumentPdf({ ...args, type: "invoice" });
 }
 
-export async function buildPayoutPdf(args: Omit<Parameters<typeof buildDocumentPdf>[0], "type">) {
+export async function buildPayoutPdf(args: Omit<PayoutArgs, "type">) {
   return buildDocumentPdf({ ...args, type: "payout" });
 }
 

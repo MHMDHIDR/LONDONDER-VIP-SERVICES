@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ATTACHMENT_MIME } from "@/lib/api";
 
+import { TFunction } from "i18next";
+
 interface NotesEvidenceSectionProps {
   notes: string;
   setNotes: (notes: string) => void;
@@ -12,7 +14,7 @@ interface NotesEvidenceSectionProps {
   setFile?: (file: File | null) => void;
   fileError?: string | null;
   handleFile?: (file: File | undefined) => void;
-  t: any;
+  t: TFunction<any, any>;
 }
 
 export function NotesEvidenceSection({

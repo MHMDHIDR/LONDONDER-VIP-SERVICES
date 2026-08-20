@@ -204,7 +204,7 @@ function EditReceiptPage() {
       toast.success("Receipt updated");
       queryClient.invalidateQueries({ queryKey: ["receipt", id] });
       queryClient.invalidateQueries({ queryKey: ["receipts"] });
-      navigate({ to: "/receipts/$id", params: { id } });
+      navigate({ to: "/invoices/$id", params: { id } });
     },
     onError: (error: Error) => setFormError(error.message),
   });
@@ -255,7 +255,7 @@ function EditReceiptPage() {
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="ghost" size="sm">
-          <Link to="/receipts/$id" params={{ id }}>
+          <Link to="/invoices/$id" params={{ id }}>
             <ArrowLeft aria-hidden="true" className="h-4 w-4 rtl:rotate-180" />
             Back to Receipt
           </Link>

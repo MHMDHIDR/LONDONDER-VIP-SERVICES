@@ -83,9 +83,9 @@ export function useNotifications(isAdmin: boolean) {
 
       setIsSubscribed(true);
       toast.success("Successfully subscribed to notifications");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error subscribing to push notifications:", error);
-      toast.error(error.message || "Failed to subscribe to notifications");
+      toast.error((error as Error).message || "Failed to subscribe to notifications");
     }
   };
 
@@ -109,7 +109,7 @@ export function useNotifications(isAdmin: boolean) {
 
       setIsSubscribed(false);
       toast.success("Unsubscribed from notifications");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error unsubscribing:", error);
       toast.error("Failed to unsubscribe");
     }
