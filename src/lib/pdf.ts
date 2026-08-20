@@ -98,7 +98,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...MUTED);
-  doc.text(isInvoice ? "INVOICE" : "PAYOUT - دفعة", PAGE_WIDTH - MARGIN, y - 4, { align: "right" });
+  doc.text(isInvoice ? "INVOICE" : "PAYOUT", PAGE_WIDTH - MARGIN, y - 4, { align: "right" });
   doc.setFontSize(13);
   doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");

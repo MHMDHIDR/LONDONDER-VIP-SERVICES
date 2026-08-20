@@ -276,7 +276,7 @@ function EditPayoutPage() {
             <h2 className="font-display text-2xl">{t("payout.details")}</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="issue-date">{t("payout.payoutDate")}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="issue-date">{t("payout.payoutDate")}</Label></div>
                 <Input
                   id="issue-date"
                   type="date"
@@ -285,94 +285,94 @@ function EditPayoutPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="service">{t("payout.service")}</Label>
-                <div className="flex gap-2">
-                  <Select
-                    value={serviceId ?? undefined}
-                    onValueChange={(value) => {
-                      const service = (services ?? []).find((s) => s.id === value);
-                      if (service) void applyService(service);
-                    }}
-                  >
-                    <SelectTrigger id="service" aria-label="Service">
-                      <SelectValue
-                        placeholder={servicesLoading ? "Loading services…" : "Select a service"}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(services ?? []).map((service) => (
-                        <SelectItem key={service.id} value={service.id}>
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label="Add new service"
-                    onClick={() => setServiceDialog(true)}
-                  >
-                    <Plus aria-hidden="true" className="h-4 w-4" />
-                  </Button>
+                <div className="space-y-2">
+                  <div className="flex items-end min-h-6"><Label htmlFor="service">{t("payout.service")}</Label></div>
+                  <div className="flex gap-2">
+                    <Select
+                      value={serviceId ?? undefined}
+                      onValueChange={(value) => {
+                        const service = (services ?? []).find((s) => s.id === value);
+                        if (service) void applyService(service);
+                      }}
+                    >
+                      <SelectTrigger id="service" aria-label="Service">
+                        <SelectValue
+                          placeholder={servicesLoading ? "Loading services…" : "Select a service"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(services ?? []).map((service) => (
+                          <SelectItem key={service.id} value={service.id}>
+                            {service.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      aria-label="Add new service"
+                      onClick={() => setServiceDialog(true)}
+                    >
+                      <Plus aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {priceLoading ? (
+                    <p className="text-xs text-muted-foreground">Resolving historical price…</p>
+                  ) : null}
                 </div>
-                {priceLoading ? (
-                  <p className="text-xs text-muted-foreground">Resolving historical price…</p>
-                ) : null}
-              </div>
-              <WorkerSelect
-                value={workerId}
-                onChange={(w) => {
-                  setWorkerId(w.id);
-                  setWorkerPhone(w.phone || "");
-                  setWorkerName(w.name || "");
-                  setWorkerNin(w.nin || "");
-                }}
-                t={t}
-              />
-              <div className="space-y-2">
-                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label>
-                <Input
-                  id="worker-phone"
-                  value={workerPhone}
-                  readOnly
-                  disabled
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
-                <Input
-                  id="worker-nin"
-                  value={workerNin}
-                  readOnly
-                  disabled
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pa-order-id">{t("payout.paOrderIdOpt")}</Label>
-                <Input
-                  id="pa-order-id"
-                  value={paOrderId}
-                  maxLength={160}
-                  onChange={(e) => setPaOrderId(e.target.value.replace(/\D/g, ""))}
-                  onKeyDown={(e) => {
-                    if (
-                      !/[\d\b]/.test(e.key) &&
-                      e.key !== "Backspace" &&
-                      e.key !== "ArrowLeft" &&
-                      e.key !== "ArrowRight" &&
-                      e.key !== "Tab" &&
-                      e.key !== "Delete"
-                    ) {
-                      e.preventDefault();
-                    }
+                <WorkerSelect
+                  value={workerId}
+                  onChange={(w) => {
+                    setWorkerId(w.id);
+                    setWorkerPhone(w.phone || "");
+                    setWorkerName(w.name || "");
+                    setWorkerNin(w.nin || "");
                   }}
-                  placeholder={t("payout.paOrderPlaceholder")}
+                  t={t}
                 />
+                <div className="space-y-2">
+                  <div className="flex items-end min-h-6"><Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label></div>
+                  <Input
+                    id="worker-phone"
+                    value={workerPhone}
+                    readOnly
+                    disabled
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-end min-h-6"><Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label></div>
+                  <Input
+                    id="worker-nin"
+                    value={workerNin}
+                    readOnly
+                    disabled
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-end min-h-6"><Label htmlFor="pa-order-id">{t("payout.paOrderIdOpt")}</Label></div>
+                  <Input
+                    id="pa-order-id"
+                    value={paOrderId}
+                    maxLength={160}
+                    onChange={(e) => setPaOrderId(e.target.value.replace(/\D/g, ""))}
+                    onKeyDown={(e) => {
+                      if (
+                        !/[\d\b]/.test(e.key) &&
+                        e.key !== "Backspace" &&
+                        e.key !== "ArrowLeft" &&
+                        e.key !== "ArrowRight" &&
+                        e.key !== "Tab" &&
+                        e.key !== "Delete"
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                    placeholder={t("payout.paOrderPlaceholder")}
+                  />
+                </div>
               </div>
-            </div>
           </section>
 
           <section className="surface-card rounded-xl p-6">
@@ -534,54 +534,54 @@ function EditPayoutPage() {
             const creator = (payout as any).creator;
             const updater = (payout as any).updater;
             return (
-            <div className="surface-card mt-6 rounded-xl p-6">
-              <h3 className="font-display text-lg mb-4">Edit History</h3>
-              <div className="relative border-l-2 border-border ml-4 space-y-6">
-                {payout.updated_at && payout.updated_at !== payout.created_at && updater && (
+              <div className="surface-card mt-6 rounded-xl p-6">
+                <h3 className="font-display text-lg mb-4">Edit History</h3>
+                <div className="relative border-l-2 border-border ml-4 space-y-6">
+                  {payout.updated_at && payout.updated_at !== payout.created_at && updater && (
+                    <div className="relative pl-6">
+                      <span className="absolute -left-4.25 top-0 bg-background rounded-full">
+                        <Avatar className="h-8 w-8 border-2 border-background">
+                          <AvatarFallback className="text-xs">
+                            {getInitials(updater.full_name || updater.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </span>
+                      <p className="text-sm">
+                        Last updated by{" "}
+                        {updater.id ? (
+                          <Link to="/managers/$id" params={{ id: updater.id }} className="font-medium hover:underline">
+                            {updater.full_name || updater.email || "Unknown"}
+                          </Link>
+                        ) : (
+                          <span className="font-medium">Unknown</span>
+                        )}
+                      </p>
+                      <time className="text-xs text-muted-foreground">{formatDateTime(payout.updated_at)}</time>
+                    </div>
+                  )}
+
                   <div className="relative pl-6">
                     <span className="absolute -left-4.25 top-0 bg-background rounded-full">
                       <Avatar className="h-8 w-8 border-2 border-background">
                         <AvatarFallback className="text-xs">
-                          {getInitials(updater.full_name || updater.email)}
+                          {getInitials(creator?.full_name || creator?.email || "Unknown")}
                         </AvatarFallback>
                       </Avatar>
                     </span>
                     <p className="text-sm">
-                      Last updated by{" "}
-                      {updater.id ? (
-                        <Link to="/managers/$id" params={{ id: updater.id }} className="font-medium hover:underline">
-                          {updater.full_name || updater.email || "Unknown"}
+                      Created by{" "}
+                      {creator?.id ? (
+                        <Link to="/managers/$id" params={{ id: creator.id }} className="font-medium hover:underline">
+                          {creator.full_name || creator.email || "Unknown"}
                         </Link>
                       ) : (
                         <span className="font-medium">Unknown</span>
                       )}
                     </p>
-                    <time className="text-xs text-muted-foreground">{formatDateTime(payout.updated_at)}</time>
+                    <time className="text-xs text-muted-foreground">{formatDateTime(payout.created_at)}</time>
                   </div>
-                )}
-                
-                <div className="relative pl-6">
-                  <span className="absolute -left-4.25 top-0 bg-background rounded-full">
-                    <Avatar className="h-8 w-8 border-2 border-background">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(creator?.full_name || creator?.email || "Unknown")}
-                      </AvatarFallback>
-                    </Avatar>
-                  </span>
-                  <p className="text-sm">
-                    Created by{" "}
-                    {creator?.id ? (
-                      <Link to="/managers/$id" params={{ id: creator.id }} className="font-medium hover:underline">
-                        {creator.full_name || creator.email || "Unknown"}
-                      </Link>
-                    ) : (
-                      <span className="font-medium">Unknown</span>
-                    )}
-                  </p>
-                  <time className="text-xs text-muted-foreground">{formatDateTime(payout.created_at)}</time>
                 </div>
               </div>
-            </div>
             );
           })()}
         </aside>

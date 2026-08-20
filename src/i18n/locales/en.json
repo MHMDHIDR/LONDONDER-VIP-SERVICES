@@ -198,6 +198,7 @@
     "workerName": "Worker name",
     "workerPhone": "Worker phone number",
     "workerNin": "National Insurance Number (NIN)",
+    "ninPlaceholder": "e.g. QQ 12 34 56 A",
     "workerNumber": "Worker number",
     "existingWorkers": "Existing Workers",
     "manage": "Manage",

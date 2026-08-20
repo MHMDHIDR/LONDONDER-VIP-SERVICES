@@ -204,7 +204,7 @@ function NewReceiptPage() {
             <h2 className="font-display text-2xl">{t("receipt.details")}</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="issue-date">{t("receipt.receiptDate")}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="issue-date">{t("receipt.receiptDate")}</Label></div>
                 <Input
                   id="issue-date"
                   type="date"
@@ -214,7 +214,7 @@ function NewReceiptPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="service">{t("receipt.service")}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="service">{t("receipt.service")}</Label></div>
                 <div className="flex gap-2">
                   <Select
                     value={serviceId ?? undefined}
@@ -261,7 +261,7 @@ function NewReceiptPage() {
                 t={t}
               />
               <div className="space-y-2">
-                <Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="worker-phone">{t("payout.workerPhoneLabel") || "Worker phone number"}</Label></div>
                 <Input
                   id="worker-phone"
                   value={workerPhone}
@@ -270,7 +270,7 @@ function NewReceiptPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="worker-nin">{t("workers.workerNin") || "National Insurance Number"}</Label></div>
                 <Input
                   id="worker-nin"
                   value={workerNin}
@@ -279,7 +279,7 @@ function NewReceiptPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pa-order-id">{t("payout.paOrderIdOpt")}</Label>
+                <div className="flex items-end min-h-6"><Label htmlFor="pa-order-id">{t("payout.paOrderIdOpt")}</Label></div>
                 <Input
                   id="pa-order-id"
                   value={paOrderId}

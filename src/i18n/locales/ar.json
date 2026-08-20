@@ -198,6 +198,7 @@
     "workerName": "اسم العامل",
     "workerPhone": "رقم هاتف العامل",
     "workerNin": "رقم التأمين الوطني (NIN)",
+    "ninPlaceholder": "مثال: QQ 12 34 56 A",
     "workerNumber": "رقم العامل",
     "existingWorkers": "العمال الحاليون",
     "manage": "إدارة",

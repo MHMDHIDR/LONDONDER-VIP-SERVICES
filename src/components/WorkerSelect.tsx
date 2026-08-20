@@ -31,7 +31,7 @@ export function WorkerSelect({ value, onChange, t }: WorkerSelectProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between min-h-6">
         <Label htmlFor="worker" className="text-paper-900">
           {t("payout.workerNameLabel") || "Worker Name"}
         </Label>
