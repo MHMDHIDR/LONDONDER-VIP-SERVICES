@@ -49,9 +49,9 @@ BEGIN
   END IF;
 
   -- Ensure we have a string for the business name
-  _biz_name_final := COALESCE(NULLIF(btrim(_biz.business_name), ''), 'London VIP Services');
+  _biz_name_final := COALESCE(NULLIF(btrim(_biz.business_name), ''), 'Londoner VIP Services');
 
-  -- Generate dynamic prefix from initials (e.g. "London VIP Services" -> "LVS")
+  -- Generate dynamic prefix from initials (e.g. "Londoner VIP Services" -> "LVS")
   SELECT string_agg(upper(substring(word FROM 1 FOR 1)), '') INTO _prefix
   FROM regexp_split_to_table(_biz_name_final, '\s+') AS word
   WHERE word <> '';

@@ -74,7 +74,7 @@ export const getGlobalBusinessSettingsFn = createServerFn({ method: "GET" }).han
   // Create it for admin if it doesn't exist
   const created = await supabaseAdmin
     .from("business_settings")
-    .insert({ user_id: adminProfile.id, business_name: "London VIP Services" })
+    .insert({ user_id: adminProfile.id, business_name: "Londoner VIP Services" })
     .select("*")
     .single();
 

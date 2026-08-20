@@ -53,7 +53,7 @@ BEGIN
     IF _svc_name IS NULL THEN RAISE EXCEPTION 'Service not found'; END IF;
   END IF;
 
-  _biz_name_final := COALESCE(NULLIF(btrim(_biz.business_name), ''), 'London VIP Services');
+  _biz_name_final := COALESCE(NULLIF(btrim(_biz.business_name), ''), 'Londoner VIP Services');
 
   INSERT INTO public.payouts (
     user_id, payout_number, issue_date, 

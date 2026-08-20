@@ -84,7 +84,7 @@ BEGIN
     NULLIF(btrim(COALESCE(_customer_email,'')), ''),
     NULLIF(btrim(COALESCE(_notes,'')), ''),
     _service_id, _svc_name,
-    COALESCE(_biz.business_name, 'London VIP Services'), _biz.logo_path,
+    COALESCE(_biz.business_name, 'Londoner VIP Services'), _biz.logo_path,
     NULLIF(btrim(COALESCE(_pa_order_id,'')), '')
   ) RETURNING id INTO _receipt_id;
 

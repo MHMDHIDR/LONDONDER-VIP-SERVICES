@@ -66,10 +66,10 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
             )}
             <span className="flex flex-col leading-tight">
               <span className="font-display text-lg">
-                {settings?.business_name || "Generative Invoices"}
+                {settings?.business_name || "Londoner VIP Services"}
               </span>
               <span className="text-[0.6rem] uppercase tracking-[0.22em] text-gold">
-                Generative Invoices
+                Londoner VIP Services
               </span>
             </span>
           </Link>
