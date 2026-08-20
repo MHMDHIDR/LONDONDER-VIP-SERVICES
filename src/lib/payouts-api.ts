@@ -77,8 +77,10 @@ export async function fetchPayout(id: string): Promise<{
 }
 
 export type NewPayoutItem = {
+  name: string;
   description: string;
-  amount_pence: number;
+  quantity: number;
+  unit_price_pence: number;
 };
 
 export async function createPayout(input: {
@@ -89,14 +91,16 @@ export async function createPayout(input: {
   serviceId?: string | null;
   paOrderId?: string | null;
 }): Promise<string> {
-  const { data, error } = await supabase.rpc("create_payout", {
+  const params: Record<string, unknown> = {
     _issue_date: input.issueDate,
     _worker_id: input.workerId,
     _notes: input.notes ?? "",
-    _items: input.items as unknown as never,
-    _service_id: input.serviceId || null,
-    _pa_order_id: input.paOrderId || null,
-  });
+    _items: input.items,
+  };
+  if (input.serviceId) params._service_id = input.serviceId;
+  if (input.paOrderId) params._pa_order_id = input.paOrderId;
+
+  const { data, error } = await supabase.rpc("create_payout", params as any);
   if (error) throw new Error(error.message);
   return data as string;
 }
@@ -110,7 +114,11 @@ export async function updatePayout(
   if (!user) throw new Error("Not authenticated");
 
   if (items) {
-    const totalPence = items.reduce((acc, item) => acc + Math.round(item.amount_pence), 0);
+    const totalPence = items.reduce(
+      (acc, item) => acc + Math.round(item.quantity * item.unit_price_pence),
+      0
+    );
+    updates.subtotal_pence = totalPence;
     updates.total_pence = totalPence;
   }
 
@@ -138,8 +146,11 @@ export async function updatePayout(
     if (items.length > 0) {
       const itemsToInsert = items.map((item, index) => ({
         payout_id: id,
+        name: item.name,
         description: item.description,
-        amount_pence: item.amount_pence,
+        quantity: item.quantity,
+        unit_price_pence: item.unit_price_pence,
+        line_total_pence: Math.round(item.quantity * item.unit_price_pence),
         position: index,
         user_id: user.id,
       }));
