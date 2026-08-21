@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,7 +48,7 @@ function matchServices(
   services: Array<Pick<Service, "id" | "name" | "description">>,
   max = 5,
 ): Array<Pick<Service, "id" | "name" | "description">> {
-  if (!query.trim()) return [];
+  if (!query.trim()) return services.slice(0, max);
   const lowerQuery = query.toLowerCase();
   const results: Array<Pick<Service, "id" | "name" | "description">> = [];
   for (const s of services) {
@@ -239,30 +239,44 @@ function ServiceAutocompleteInput({
   return (
     <Popover open={showDropdown} onOpenChange={setOpen}>
       <PopoverAnchor asChild>
-        <Input
-          ref={inputRef}
-          id={id}
-          value={value}
-          maxLength={maxLength}
-          placeholder={placeholder}
-          autoComplete="off"
-          onChange={(e) => {
-            onChange(e.target.value);
-            setOpen(true);
-            setHighlightIndex(-1);
-          }}
-          onFocus={() => {
-            if (value.trim().length >= 1) setOpen(true);
-          }}
-          onKeyDown={handleKeyDown}
-          role="combobox"
-          aria-expanded={showDropdown}
-          aria-controls={`${id}-listbox`}
-          aria-autocomplete="list"
-          aria-activedescendant={
-            highlightIndex >= 0 ? `${id}-option-${highlightIndex}` : undefined
-          }
-        />
+        <div className="relative">
+          <Input
+            ref={inputRef}
+            id={id}
+            value={value}
+            maxLength={maxLength}
+            placeholder={placeholder}
+            autoComplete="off"
+            onChange={(e) => {
+              onChange(e.target.value);
+              setOpen(true);
+              setHighlightIndex(-1);
+            }}
+            onFocus={() => {
+              setOpen(true);
+            }}
+            onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-expanded={showDropdown}
+            aria-controls={`${id}-listbox`}
+            aria-autocomplete="list"
+            aria-activedescendant={
+              highlightIndex >= 0 ? `${id}-option-${highlightIndex}` : undefined
+            }
+            className="pe-10"
+          />
+          <button
+            type="button"
+            className="absolute end-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus:outline-none"
+            onClick={() => {
+              inputRef.current?.focus();
+              setOpen(!open);
+            }}
+            tabIndex={-1}
+          >
+            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+          </button>
+        </div>
       </PopoverAnchor>
       <PopoverContent
         id={`${id}-listbox`}

@@ -69,6 +69,8 @@
   "receipt": {
     "receipt": "فاتورة",
     "service": "الخدمة",
+    "servicePlaceholder": "اختر خدمة",
+    "noServicesFound": "لم يتم العثور على خدمات",
     "subtotal": "المجموع الفرعي",
     "notes": "ملاحظات",
     "details": "التفاصيل",
@@ -227,6 +229,8 @@
   "payout": {
     "payout": "دفعة",
     "service": "الخدمة",
+    "servicePlaceholder": "اختر خدمة",
+    "noServicesFound": "لم يتم العثور على خدمات",
     "subtotal": "المجموع الفرعي",
     "notes": "ملاحظات",
     "details": "التفاصيل",

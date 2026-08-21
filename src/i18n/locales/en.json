@@ -69,6 +69,8 @@
   "receipt": {
     "receipt": "Invoice",
     "service": "Service",
+    "servicePlaceholder": "Select a service",
+    "noServicesFound": "No services found",
     "subtotal": "Subtotal",
     "notes": "Notes",
     "details": "Details",
@@ -227,6 +229,8 @@
   "payout": {
     "payout": "Payout",
     "service": "Service",
+    "servicePlaceholder": "Select a service",
+    "noServicesFound": "No services found",
     "subtotal": "Subtotal",
     "notes": "Notes",
     "details": "Details",
