@@ -14,7 +14,8 @@
     "password": "كلمة المرور",
     "name": "الاسم",
     "fullName": "الاسم الكامل",
-    "description": "الوصف"
+    "description": "الوصف",
+    "search": "بحث..."
   },
   "nav": {
     "dashboard": "لوحة التحكم",
@@ -76,6 +77,7 @@
     "details": "التفاصيل",
     "qty": "الكمية",
     "description": "الوصف",
+    "search": "بحث...",
     "summary": "الملخص",
     "client": "العميل",
     "generateReceipt": "إنشاء فاتورة",
@@ -236,6 +238,7 @@
     "details": "التفاصيل",
     "qty": "الكمية",
     "description": "الوصف",
+    "search": "بحث...",
     "summary": "الملخص",
     "worker": "العامل",
     "generatePayout": "إنشاء دفعة",
