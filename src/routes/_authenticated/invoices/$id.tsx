@@ -66,10 +66,10 @@ function ReceiptPage() {
   const receipt = data?.receipt ?? null;
   const items = data?.items ?? [];
 
-  const { data: logoUrl } = useQuery({
-    queryKey: ["logo-url", receipt?.logo_path_snapshot],
-    queryFn: () => signedUrl(LOGO_BUCKET, receipt?.logo_path_snapshot ?? null, 600),
-    enabled: Boolean(receipt?.logo_path_snapshot),
+    const { data: logoUrl } = useQuery({
+    queryKey: ["logo-url", settings?.logo_path || receipt?.logo_path_snapshot],
+    queryFn: () => signedUrl(LOGO_BUCKET, settings?.logo_path || receipt?.logo_path_snapshot || null, 600),
+    enabled: Boolean(settings?.logo_path || receipt?.logo_path_snapshot),
   });
 
   async function handleDownload() {
@@ -100,7 +100,7 @@ function ReceiptPage() {
   }, [download, receipt, autoRan]);
 
   const shareText = receipt
-    ? `Receipt ${receipt.receipt_number} from ${receipt.business_name_snapshot}, ${formatPence(
+    ? `Receipt ${receipt.receipt_number} from ${(settings?.business_name || receipt.business_name_snapshot || "Londoner VIP Services")}, ${formatPence(
         receipt.total_pence,
       )} issued ${formatDateLong(receipt.issue_date)}.`
     : "";
@@ -311,12 +311,12 @@ function ReceiptPage() {
             {logoUrl ? (
               <img
                 src={logoUrl}
-                alt={`${receipt.business_name_snapshot} logo`}
+                alt={`${(settings?.business_name || receipt.business_name_snapshot || "Londoner VIP Services")} logo`}
                 className="h-20 w-auto object-contain"
               />
             ) : null}
             <div>
-              <h1 className="font-display text-3xl">{receipt.business_name_snapshot}</h1>
+              <h1 className="font-display text-3xl">{(settings?.business_name || receipt.business_name_snapshot || "Londoner VIP Services")}</h1>
               <p className="text-eyebrow mt-1">{t("receipt.receipt")}</p>
             </div>
           </div>
