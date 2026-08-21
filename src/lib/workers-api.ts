@@ -45,13 +45,13 @@ export async function createWorker(input: { data: { name: string; phone?: string
 export async function updateWorker(input: {
   data: {
     id: string;
-    patch: { name?: string; phone?: string; active?: boolean; nin?: string };
+    patch: { name?: string; phone?: string; active?: boolean; nin?: string | null };
   };
 }) {
   const patch = { ...input.data.patch };
   if (typeof patch.name === "string") patch.name = patch.name.trim();
   if (typeof patch.phone === "string") patch.phone = patch.phone.trim();
-  if (typeof patch.nin === "string") patch.nin = patch.nin.trim();
+  if (typeof patch.nin === "string") patch.nin = patch.nin.trim() || null;
   
   const res = await supabase
     .from("workers")

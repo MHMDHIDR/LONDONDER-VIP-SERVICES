@@ -170,7 +170,7 @@ function PayoutPage() {
     try {
       await softDeletePayout(payout.id, payout.pdf_path);
       toast.success(t("payout.deleted"));
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/payouts" });
     } catch (err) {
       toast.error((err as Error).message || "Failed to delete payout");
       setIsDeleting(false);

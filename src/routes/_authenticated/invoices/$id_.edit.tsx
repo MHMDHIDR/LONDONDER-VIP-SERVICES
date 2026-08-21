@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import {
+  ATTACHMENT_MIME,
+  MAX_ATTACHMENT_BYTES,
+  attachEvidence,
   fetchReceipt,
   fetchServices,
   resolvePriceAt,
@@ -46,42 +49,13 @@ function formatDateTime(iso: string) {
     return iso;
   }
 }
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableServiceSelect } from "@/components/SearchableServiceSelect";
 
 export const Route = createFileRoute("/_authenticated/invoices/$id_/edit")({
   component: EditReceiptPage,
 });
 
-type DraftItem = {
-  key: string;
-  name: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-};
-
-function emptyItem(): DraftItem {
-  return {
-    key: crypto.randomUUID(),
-    name: "",
-    description: "",
-    quantity: "1",
-    unitPrice: "",
-  };
-}
-
-function itemPence(item: DraftItem) {
-  const quantity = Number.parseFloat(item.quantity);
-  const unit = parsePoundsToPence(item.unitPrice) ?? 0;
-  if (!Number.isFinite(quantity) || quantity <= 0) return 0;
-  return lineTotalPence(quantity, unit);
-}
+import { LineItemsSection, type LineItem as DraftItem, emptyItem, itemPence } from "@/components/LineItemsSection";
 
 function EditReceiptPage() {
   const { t } = useTranslation();
@@ -105,6 +79,8 @@ function EditReceiptPage() {
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [serviceDialog, setServiceDialog] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
 
@@ -176,6 +152,20 @@ function EditReceiptPage() {
     }
   }
 
+  function handleFile(next: File | undefined) {
+    setFileError(null);
+    if (!next) return;
+    if (!ATTACHMENT_MIME.includes(next.type)) {
+      setFileError("Evidence must be a PNG, JPEG, WebP image or a PDF.");
+      return;
+    }
+    if (next.size > MAX_ATTACHMENT_BYTES) {
+      setFileError("Evidence must be 10 MB or smaller.");
+      return;
+    }
+    setFile(next);
+  }
+
   const update = useMutation({
     mutationFn: async () => {
       const payload = items
@@ -199,6 +189,16 @@ function EditReceiptPage() {
         },
         payload
       );
+
+      if (file) {
+        try {
+          await attachEvidence(id, file);
+        } catch (error) {
+          toast.warning("Receipt updated, but evidence upload failed", {
+            description: (error as Error).message,
+          });
+        }
+      }
     },
     onSuccess: () => {
       toast.success("Receipt updated");
@@ -286,26 +286,13 @@ function EditReceiptPage() {
               <div className="space-y-2">
                 <Label htmlFor="service">{t("receipt.service")}</Label>
                 <div className="flex gap-2">
-                  <Select
-                    value={serviceId ?? undefined}
-                    onValueChange={(value) => {
-                      const service = (services ?? []).find((s) => s.id === value);
-                      if (service) void applyService(service);
-                    }}
-                  >
-                    <SelectTrigger id="service" aria-label="Service">
-                      <SelectValue
-                        placeholder={servicesLoading ? "Loading services…" : "Select a service"}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(services ?? []).map((service) => (
-                        <SelectItem key={service.id} value={service.id}>
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableServiceSelect
+                    value={serviceId}
+                    onChange={(service) => void applyService(service)}
+                    services={services ?? []}
+                    isLoading={servicesLoading}
+                    t={t}
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -452,6 +439,10 @@ function EditReceiptPage() {
           <NotesEvidenceSection
             notes={notes}
             setNotes={setNotes}
+            file={file}
+            setFile={setFile}
+            fileError={fileError}
+            handleFile={handleFile}
             t={t}
           />
         </div>

@@ -30,13 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableServiceSelect } from "@/components/SearchableServiceSelect";
 
 export const Route = createFileRoute("/_authenticated/invoices/new")({
   head: () => ({
@@ -218,26 +212,13 @@ function NewReceiptPage() {
               <div className="space-y-2">
                 <Label htmlFor="service">{t("receipt.service")}</Label>
                 <div className="flex gap-2">
-                  <Select
-                    value={serviceId ?? undefined}
-                    onValueChange={(value) => {
-                      const service = (services ?? []).find((s) => s.id === value);
-                      if (service) void applyService(service);
-                    }}
-                  >
-                    <SelectTrigger id="service" aria-label="Service">
-                      <SelectValue
-                        placeholder={servicesLoading ? "Loading services…" : "Select a service"}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(services ?? []).map((service) => (
-                        <SelectItem key={service.id} value={service.id}>
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableServiceSelect
+                    value={serviceId}
+                    onChange={(service) => void applyService(service)}
+                    services={services ?? []}
+                    isLoading={servicesLoading}
+                    t={t}
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -297,7 +278,7 @@ function NewReceiptPage() {
             </div>
           </section>
 
-          <LineItemsSection items={items} setItems={setItems} t={t} currency="GBP" />
+          <LineItemsSection items={items} setItems={setItems} t={t} currency="GBP" services={services ?? []} />
 
           <NotesEvidenceSection
             notes={notes}

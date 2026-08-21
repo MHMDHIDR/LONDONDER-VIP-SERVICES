@@ -82,7 +82,7 @@ function WorkerEditPage() {
           patch: {
             name,
             phone: phone || undefined,
-            nin: nin || undefined,
+            nin: nin || null,
             active,
           },
         },

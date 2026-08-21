@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Save, ArrowLeft } from "lucide-react";
 import {
+  ATTACHMENT_MIME,
+  MAX_ATTACHMENT_BYTES,
   fetchServices,
   resolvePriceAt,
   type Service,
 } from "@/lib/api";
-import { fetchPayout, updatePayout } from "@/lib/payouts-api";
+import { attachPayoutEvidence, fetchPayout, updatePayout } from "@/lib/payouts-api";
 import {
   formatDateLong,
   formatPence,
@@ -46,42 +48,14 @@ function formatDateTime(iso: string) {
     return iso;
   }
 }
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableServiceSelect } from "@/components/SearchableServiceSelect";
+
+import { LineItemsSection, type LineItem as DraftItem, emptyItem, itemPence } from "@/components/LineItemsSection";
 
 export const Route = createFileRoute("/_authenticated/payouts/$id_/edit")({
   component: EditPayoutPage,
 });
 
-type DraftItem = {
-  key: string;
-  name: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-};
-
-function emptyItem(): DraftItem {
-  return {
-    key: crypto.randomUUID(),
-    name: "",
-    description: "",
-    quantity: "1",
-    unitPrice: "",
-  };
-}
-
-function itemPence(item: DraftItem) {
-  const quantity = Number.parseFloat(item.quantity);
-  const unit = parsePoundsToPence(item.unitPrice) ?? 0;
-  if (!Number.isFinite(quantity) || quantity <= 0) return 0;
-  return lineTotalPence(quantity, unit);
-}
 
 function EditPayoutPage() {
   const { t } = useTranslation();
@@ -107,6 +81,8 @@ function EditPayoutPage() {
   const [items, setItems] = useState<DraftItem[]>([emptyItem()]);
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [serviceDialog, setServiceDialog] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
 
@@ -144,10 +120,6 @@ function EditPayoutPage() {
   const selectedService = (services ?? []).find((s) => s.id === serviceId) ?? null;
   const subtotal = sumPence(items.map(itemPence));
 
-  function patchItem(key: string, patch: Partial<DraftItem>) {
-    setItems((prev) => prev.map((item) => (item.key === key ? { ...item, ...patch } : item)));
-  }
-
   async function applyService(service: Service) {
     setServiceId(service.id);
     setPriceLoading(true);
@@ -180,6 +152,20 @@ function EditPayoutPage() {
     }
   }
 
+  function handleFile(next: File | undefined) {
+    setFileError(null);
+    if (!next) return;
+    if (!ATTACHMENT_MIME.includes(next.type)) {
+      setFileError("Evidence must be a PNG, JPEG, WebP image or a PDF.");
+      return;
+    }
+    if (next.size > MAX_ATTACHMENT_BYTES) {
+      setFileError("Evidence must be 10 MB or smaller.");
+      return;
+    }
+    setFile(next);
+  }
+
   const update = useMutation({
     mutationFn: async () => {
       const payload = items
@@ -204,6 +190,16 @@ function EditPayoutPage() {
         },
         payload
       );
+
+      if (file) {
+        try {
+          await attachPayoutEvidence(id, file);
+        } catch (error) {
+          toast.warning("Payout updated, but evidence upload failed", {
+            description: (error as Error).message,
+          });
+        }
+      }
     },
     onSuccess: () => {
       toast.success("Payout updated");
@@ -287,27 +283,14 @@ function EditPayoutPage() {
               </div>
                 <div className="space-y-2">
                   <div className="flex items-end min-h-6"><Label htmlFor="service">{t("payout.service")}</Label></div>
-                  <div className="flex gap-2">
-                    <Select
-                      value={serviceId ?? undefined}
-                      onValueChange={(value) => {
-                        const service = (services ?? []).find((s) => s.id === value);
-                        if (service) void applyService(service);
-                      }}
-                    >
-                      <SelectTrigger id="service" aria-label="Service">
-                        <SelectValue
-                          placeholder={servicesLoading ? "Loading services…" : "Select a service"}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(services ?? []).map((service) => (
-                          <SelectItem key={service.id} value={service.id}>
-                            {service.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                    <SearchableServiceSelect
+                      value={serviceId}
+                      onChange={(service) => void applyService(service)}
+                      services={services ?? []}
+                      isLoading={servicesLoading}
+                      t={t}
+                    />
                     <Button
                       type="button"
                       variant="outline"
@@ -375,94 +358,15 @@ function EditPayoutPage() {
               </div>
           </section>
 
-          <section className="surface-card rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl">{t("payout.lineItems")}</h2>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setItems((prev) => [...prev, emptyItem()])}
-              >
-                <Plus aria-hidden="true" className="h-4 w-4 rtl:rotate-180 me-2 ms-0" />
-                {t("payout.addItem")}
-              </Button>
-            </div>
-
-            <ul className="mt-5 space-y-4">
-              {items.map((item, index) => (
-                <li key={item.key} className="rounded-lg border border-border p-4">
-                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_6rem_8rem]">
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-name-${item.key}`}>
-                        {t("payout.item")} {index + 1}
-                      </Label>
-                      <Input
-                        id={`item-name-${item.key}`}
-                        value={item.name}
-                        maxLength={200}
-                        placeholder={t("payout.itemNamePlaceholder")}
-                        onChange={(e) => patchItem(item.key, { name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-qty-${item.key}`}>{t("payout.qty")}</Label>
-                      <Input
-                        id={`item-qty-${item.key}`}
-                        inputMode="decimal"
-                        value={item.quantity}
-                        onChange={(e) => patchItem(item.key, { quantity: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`item-price-${item.key}`}>{t("payout.unitPriceGbp")}</Label>
-                      <Input
-                        id={`item-price-${item.key}`}
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        value={item.unitPrice}
-                        onChange={(e) => patchItem(item.key, { unitPrice: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-2">
-                    <Label htmlFor={`item-desc-${item.key}`}>{t("payout.description")}</Label>
-                    <Input
-                      id={`item-desc-${item.key}`}
-                      value={item.description}
-                      maxLength={1000}
-                      onChange={(e) => patchItem(item.key, { description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                    <p className="text-sm text-muted-foreground">
-                      {t("payout.lineTotal")}{" "}
-                      <span className="font-medium text-foreground">
-                        {formatPence(itemPence(item))}
-                      </span>
-                    </p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      aria-label={`Remove item ${index + 1}`}
-                      disabled={items.length === 1}
-                      onClick={() => setItems((prev) => prev.filter((i) => i.key !== item.key))}
-                    >
-                      <Trash2 aria-hidden="true" className="h-4 w-4 me-2 ms-0" />
-                      {t("payout.removeItem")}
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
+          <LineItemsSection items={items} setItems={setItems} t={t} currency="GBP" services={services ?? []} />
 
           <NotesEvidenceSection
             notes={notes}
             setNotes={setNotes}
+            file={file}
+            setFile={setFile}
+            fileError={fileError}
+            handleFile={handleFile}
             t={t}
           />
         </div>
