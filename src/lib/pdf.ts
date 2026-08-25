@@ -139,6 +139,14 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
     doc.setTextColor(...MUTED);
     doc.text(`Service: ${docData.service_name_snapshot}`, MARGIN, y);
   }
+  if (docData.pa_order_id) {
+    y += 6;
+    doc.setFontSize(9);
+    doc.setTextColor(...INK);
+    doc.setFont("helvetica", "bold");
+    doc.text(`PA Order: ${docData.pa_order_id}`, MARGIN, y);
+    doc.setFont("helvetica", "normal");
+  }
 
   y += 12;
   doc.setFillColor(245, 242, 235);
@@ -153,7 +161,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
 
   doc.setTextColor(...INK);
   for (const item of items) {
-    if (y > PAGE_HEIGHT - 60) {
+    if (y > PAGE_HEIGHT - 75) {
       doc.addPage();
       y = MARGIN;
     }
@@ -197,6 +205,11 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
   doc.text(formatPence(docData.total_pence), PAGE_WIDTH - MARGIN - 3, y + 1, { align: "right" });
 
   if (docData.notes) {
+    const noteLines = doc.splitTextToSize(docData.notes, PAGE_WIDTH - MARGIN * 2) as string[];
+    if (y + 21 + noteLines.length * 4.5 > PAGE_HEIGHT - 65) {
+      doc.addPage();
+      y = MARGIN;
+    }
     y += 16;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -205,8 +218,57 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
     y += 5;
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
-    const noteLines = doc.splitTextToSize(docData.notes, PAGE_WIDTH - MARGIN * 2) as string[];
     doc.text(noteLines, MARGIN, y);
+    y += noteLines.length * 4.5;
+  }
+
+  if (isInvoice) {
+    if (y > PAGE_HEIGHT - 65) {
+      doc.addPage();
+    }
+    let by = PAGE_HEIGHT - 55;
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(130, 125, 115);
+    doc.text("PAYMENT DETAILS", MARGIN, by);
+    by += 4.5;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(7.5);
+    
+    const drawKV = (k: string, v: string, x: number, yPos: number) => {
+      doc.setTextColor(130, 125, 115);
+      doc.text(k, x, yPos);
+      doc.setTextColor(70, 70, 70);
+      doc.text(v, x + doc.getTextWidth(k) + 1.5, yPos);
+    };
+
+    drawKV("Recipient:", "LONDONER VIP SERVICES LTD", MARGIN, by);
+    by += 3.5;
+    drawKV("Recipient address:", "61 Bridge Street, HR5 3DJ, Kington, United Kingdom", MARGIN, by);
+    by += 5.5;
+
+    doc.setFont("times", "italic");
+    doc.setTextColor(130, 125, 115);
+    doc.text("Transfer from a UK bank?", MARGIN, by);
+    doc.setFont("times", "normal");
+    by += 3.5;
+
+    drawKV("Account number:", "90627533", MARGIN, by);
+    drawKV("Sort code:", "23-01-63", MARGIN + 40, by);
+    by += 5.5;
+
+    doc.setFont("times", "italic");
+    doc.setTextColor(130, 125, 115);
+    doc.text("Transfer from outside the UK?", MARGIN, by);
+    doc.setFont("times", "normal");
+    by += 3.5;
+
+    drawKV("IBAN:", "GB96 REVO 2301 6390 6275 33", MARGIN, by);
+    by += 3.5;
+    drawKV("BIC:", "REVOGB21", MARGIN, by);
+    drawKV("Intermediary BIC:", "CHASGB2L", MARGIN + 35, by);
   }
 
   const documentNumber = isInvoice ? args.receipt.receipt_number : args.payout.payout_number;
@@ -226,6 +288,7 @@ export async function buildDocumentPdf(args: InvoiceArgs | PayoutArgs): Promise<
     );
   }
 
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
