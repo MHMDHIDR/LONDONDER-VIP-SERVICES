@@ -23,7 +23,8 @@
     "managers": "المدراء",
     "settings": "الإعدادات",
     "workers": "العمال",
-    "payouts": "المدفوعات"
+    "payouts": "المدفوعات",
+    "analytics": "التحليلات"
   },
   "auth": {
     "signIn": "تسجيل الدخول",
@@ -91,7 +92,14 @@
       "error": "تعذّر تحميل النظرة العامة.",
       "loading": "جاري تحميل النظرة العامة…",
       "tableCaption": "بيانات الرسم البياني كجدول",
-      "tablePeriod": "الفترة"
+      "tablePeriod": "الفترة",
+      "customRange": "فترة مخصصة",
+      "pickRange": "اختر تاريخ البداية والنهاية",
+      "confirm": "تأكيد",
+      "perMonth": "شهرياً",
+      "paidOutByWorker": "المدفوعات حسب العامل",
+      "paidOutByWorkerDesc": "لمن ذهبت المدفوعات في هذه الفترة",
+      "unknownWorker": "عامل غير معروف"
     }
   },
   "receipt": {
@@ -330,5 +338,10 @@
     "noPayouts": "لا توجد مدفوعات بعد",
     "noPayoutsDesc": "أصدر دفعتك الأولى لبدء بناء مكتبتك.",
     "loadMore": "تحميل المزيد (المتبقي {{count}})"
+  },
+  "analytics": {
+    "eyebrow": "رؤى",
+    "title": "التحليلات",
+    "description": "الإيرادات والمدفوعات ولمن ذهبت، لأي فترة تختارها."
   }
 }

@@ -13,6 +13,14 @@ import { usePrefersReducedMotion } from "@/hooks/useCountUp";
 import { formatPence } from "@/lib/money";
 import { compactGBP, type Bucket, type Granularity, type Totals } from "@/lib/stats";
 import { ChartCard, ChartEmpty, SeriesValue } from "./ChartCard";
+import {
+  ANIMATION,
+  CHART_HEIGHT,
+  CHART_MARGIN,
+  EMPTY_HEIGHT,
+  GRANULARITY_KEY,
+  periodLabel,
+} from "./chart-utils";
 
 const SERIES = [
   { key: "invoiced", color: "var(--color-chart-1)" },
@@ -39,14 +47,11 @@ export function MoneyFlowChart({
     paidOut: { label: t("dashboard.overview.paidOut"), color: SERIES[1].color },
   } satisfies ChartConfig;
 
-  const periodLabel = (label: string) =>
-    granularity === "week" ? t("dashboard.overview.weekCommencing", { date: label }) : label;
+  const label = (value: string) => periodLabel(value, granularity, t);
 
   return (
     <ChartCard
-      eyebrow={t(
-        granularity === "week" ? "dashboard.overview.perWeek" : "dashboard.overview.perDay",
-      )}
+      eyebrow={t(GRANULARITY_KEY[granularity])}
       title={t("dashboard.overview.moneyFlow")}
       description={t("dashboard.overview.moneyFlowDesc")}
       summary={
@@ -76,7 +81,7 @@ export function MoneyFlowChart({
           <tbody>
             {buckets.map((b) => (
               <tr key={b.key}>
-                <th scope="row">{periodLabel(b.label)}</th>
+                <th scope="row">{label(b.label)}</th>
                 <td>{formatPence(b.invoiced)}</td>
                 <td>{formatPence(b.paidOut)}</td>
               </tr>
@@ -86,11 +91,11 @@ export function MoneyFlowChart({
       }
     >
       {empty ? (
-        <ChartEmpty message={t("dashboard.overview.empty")} className="h-64 sm:h-72" />
+        <ChartEmpty message={t("dashboard.overview.empty")} className={EMPTY_HEIGHT} />
       ) : (
         <div dir="ltr">
-          <ChartContainer config={config} className="aspect-auto h-64 w-full sm:h-72">
-            <AreaChart data={buckets} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <ChartContainer config={config} className={CHART_HEIGHT}>
+            <AreaChart data={buckets} margin={CHART_MARGIN}>
               <defs>
                 {SERIES.map((s) => (
                   <linearGradient
@@ -118,7 +123,7 @@ export function MoneyFlowChart({
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                width={48}
+                width={42}
                 allowDecimals={false}
                 tickFormatter={(v: number) => compactGBP(v, lang)}
               />
@@ -126,7 +131,7 @@ export function MoneyFlowChart({
                 cursor={{ stroke: "var(--color-border)" }}
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(label) => periodLabel(String(label))}
+                    labelFormatter={(value) => label(String(value))}
                     formatter={(value, name, item) => (
                       <SeriesValue
                         color={item.color}
@@ -150,8 +155,7 @@ export function MoneyFlowChart({
                   activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--color-card)" }}
                   isAnimationActive={!reduced}
                   animationBegin={index * 120}
-                  animationDuration={900}
-                  animationEasing="ease-out"
+                  {...ANIMATION}
                 />
               ))}
             </AreaChart>

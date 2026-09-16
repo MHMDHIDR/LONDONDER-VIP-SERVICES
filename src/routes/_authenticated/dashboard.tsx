@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { OverviewSection } from "@/components/dashboard/OverviewSection";
 
 const PAGE_SIZE = 11;
 
@@ -55,7 +55,7 @@ function DashboardPage() {
         }
       />
 
-      <DashboardOverview />
+      <OverviewSection className="mb-10" />
 
       <div className="mb-4">
         <h2 className="font-display text-2xl">{t("dashboard.libraryTitle")}</h2>

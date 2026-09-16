@@ -1,16 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-import {
-  presetWindows,
-  type DashboardStatsRaw,
-  type Granularity,
-  type RangePreset,
-  type StatsWindow,
-} from "@/lib/stats";
+import type { DashboardStatsRaw, ResolvedRange, StatsWindow } from "@/lib/stats";
 
 export type DashboardOverviewData = {
   current: DashboardStatsRaw;
   previous: DashboardStatsRaw;
-  granularity: Granularity;
+  range: ResolvedRange;
 };
 
 export async function fetchDashboardStats(window: StatsWindow): Promise<DashboardStatsRaw> {
@@ -23,14 +17,10 @@ export async function fetchDashboardStats(window: StatsWindow): Promise<Dashboar
 }
 
 /** Current + previous window in parallel, so KPI deltas and charts share one load. */
-export async function fetchDashboardOverview(
-  preset: RangePreset,
-  todayISO: string,
-): Promise<DashboardOverviewData> {
-  const { current, previous, granularity } = presetWindows(preset, todayISO);
-  const [cur, prev] = await Promise.all([
-    fetchDashboardStats(current),
-    fetchDashboardStats(previous),
+export async function fetchDashboardOverview(range: ResolvedRange): Promise<DashboardOverviewData> {
+  const [current, previous] = await Promise.all([
+    fetchDashboardStats(range.current),
+    fetchDashboardStats(range.previous),
   ]);
-  return { current: cur, previous: prev, granularity };
+  return { current, previous, range };
 }

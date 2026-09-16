@@ -13,43 +13,51 @@ import { usePrefersReducedMotion } from "@/hooks/useCountUp";
 import { formatPence } from "@/lib/money";
 import {
   compactGBP,
-  serviceLabel,
+  seriesLabel,
   type Granularity,
-  type ServiceRow,
-  type ServiceSeries,
-  type ServiceSeriesKey,
+  type GroupSeries,
+  type SeriesRow,
 } from "@/lib/stats";
 import { ChartCard, ChartEmpty, SeriesValue } from "./ChartCard";
+import {
+  ANIMATION,
+  CHART_HEIGHT,
+  CHART_MARGIN,
+  EMPTY_HEIGHT,
+  GRANULARITY_KEY,
+  SLOT_COLOR,
+  periodLabel,
+} from "./chart-utils";
 
-const SLOT_COLOR: Record<ServiceSeriesKey, string> = {
-  s0: "var(--color-chart-1)",
-  s1: "var(--color-chart-2)",
-  s2: "var(--color-chart-3)",
-  s3: "var(--color-chart-4)",
-  s4: "var(--color-chart-5)",
-  other: "var(--color-chart-other)",
-};
-
-export function RevenueByServiceChart({
-  rows,
-  series,
-  granularity,
+/**
+ * A stacked area of money over time split by a group (services, workers, ...).
+ * The top groups take fixed colour slots; the rest is folded into a grey "Other".
+ */
+export function StackedSeriesChart({
+  title,
+  description,
+  summaryLabel,
   total,
+  series,
+  rows,
+  granularity,
+  labels,
 }: {
-  rows: ServiceRow[];
-  series: ServiceSeries[];
-  granularity: Granularity;
+  title: string;
+  description: string;
+  /** Caption above the period total in the card header, e.g. "Invoiced". */
+  summaryLabel: string;
   total: number;
+  series: GroupSeries[];
+  rows: SeriesRow[];
+  granularity: Granularity;
+  labels: { unnamed: string; other: string };
 }) {
   const { t, i18n } = useTranslation();
   const reduced = usePrefersReducedMotion();
   const gradientId = useId().replace(/:/g, "");
   const lang = i18n.language;
-  const labels = {
-    custom: t("dashboard.customLineItems"),
-    other: t("dashboard.overview.other"),
-  };
-  const names = Object.fromEntries(series.map((s) => [s.key, serviceLabel(s, labels)])) as Record<
+  const names = Object.fromEntries(series.map((s) => [s.key, seriesLabel(s, labels)])) as Record<
     string,
     string
   >;
@@ -63,26 +71,23 @@ export function RevenueByServiceChart({
         label: (
           <span className="inline-flex items-baseline gap-1.5">
             <span className="max-w-40 truncate">{names[s.key]}</span>
-            <span className="font-display text-sm text-foreground">{formatPence(s.invoiced)}</span>
+            <span className="font-display text-sm text-foreground">{formatPence(s.pence)}</span>
           </span>
         ),
       },
     ]),
   ) satisfies ChartConfig;
 
-  const periodLabel = (label: string) =>
-    granularity === "week" ? t("dashboard.overview.weekCommencing", { date: label }) : label;
+  const label = (value: string) => periodLabel(value, granularity, t);
 
   return (
     <ChartCard
-      eyebrow={t(
-        granularity === "week" ? "dashboard.overview.perWeek" : "dashboard.overview.perDay",
-      )}
-      title={t("dashboard.overview.byService")}
-      description={t("dashboard.overview.byServiceDesc")}
+      eyebrow={t(GRANULARITY_KEY[granularity])}
+      title={title}
+      description={description}
       summary={
         <div className="min-w-32">
-          <p className="text-xs text-muted-foreground">{t("dashboard.overview.invoiced")}</p>
+          <p className="text-xs text-muted-foreground">{summaryLabel}</p>
           <p className="font-display text-2xl leading-tight">{formatPence(total)}</p>
         </div>
       }
@@ -102,7 +107,7 @@ export function RevenueByServiceChart({
           <tbody>
             {rows.map((r) => (
               <tr key={r.key}>
-                <th scope="row">{periodLabel(r.label)}</th>
+                <th scope="row">{label(r.label)}</th>
                 {series.map((s) => (
                   <td key={s.key}>{formatPence(r[s.key] ?? 0)}</td>
                 ))}
@@ -113,11 +118,11 @@ export function RevenueByServiceChart({
       }
     >
       {total === 0 || series.length === 0 ? (
-        <ChartEmpty message={t("dashboard.overview.empty")} className="h-64 sm:h-72" />
+        <ChartEmpty message={t("dashboard.overview.empty")} className={EMPTY_HEIGHT} />
       ) : (
         <div dir="ltr">
-          <ChartContainer config={config} className="aspect-auto h-64 w-full sm:h-72">
-            <AreaChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <ChartContainer config={config} className={CHART_HEIGHT}>
+            <AreaChart data={rows} margin={CHART_MARGIN}>
               <defs>
                 {series.map((s) => (
                   <linearGradient
@@ -145,7 +150,7 @@ export function RevenueByServiceChart({
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                width={48}
+                width={42}
                 allowDecimals={false}
                 tickFormatter={(v: number) => compactGBP(v, lang)}
               />
@@ -153,7 +158,7 @@ export function RevenueByServiceChart({
                 cursor={{ stroke: "var(--color-border)" }}
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(label) => periodLabel(String(label))}
+                    labelFormatter={(value) => label(String(value))}
                     formatter={(value, name, item) => (
                       <SeriesValue
                         color={item.color}
@@ -173,7 +178,7 @@ export function RevenueByServiceChart({
                   key={s.key}
                   type="monotone"
                   dataKey={s.key}
-                  stackId="revenue"
+                  stackId="stack"
                   stroke={`var(--color-${s.key})`}
                   strokeWidth={2}
                   fill={`url(#${gradientId}-${s.key})`}
@@ -181,8 +186,7 @@ export function RevenueByServiceChart({
                   activeDot={{ r: 4, strokeWidth: 2, stroke: "var(--color-card)" }}
                   isAnimationActive={!reduced}
                   animationBegin={index * 120}
-                  animationDuration={900}
-                  animationEasing="ease-out"
+                  {...ANIMATION}
                 />
               ))}
             </AreaChart>

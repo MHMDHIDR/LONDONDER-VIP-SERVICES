@@ -23,8 +23,8 @@ export function ChartCard({
   className,
 }: ChartCardProps) {
   return (
-    <section className={cn("surface-card min-w-0 rounded-xl p-5", className)} aria-label={title}>
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+    <section className={cn("surface-card min-w-0 rounded-xl py-5", className)} aria-label={title}>
+      <header className="mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-5">
         <div className="min-w-0">
           <p className="text-eyebrow">{eyebrow}</p>
           <h3 className="mt-1 font-display text-xl leading-tight">{title}</h3>
@@ -32,7 +32,8 @@ export function ChartCard({
         </div>
         {summary ? <div className="text-end text-sm">{summary}</div> : null}
       </header>
-      {children}
+      {/* The plot hugs the card edges so the axis figures sit almost flush with the border. */}
+      <div className="px-1">{children}</div>
       {table}
     </section>
   );

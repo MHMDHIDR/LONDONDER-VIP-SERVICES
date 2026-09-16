@@ -23,7 +23,8 @@
     "managers": "Managers",
     "settings": "Settings",
     "workers": "Workers",
-    "payouts": "Payouts"
+    "payouts": "Payouts",
+    "analytics": "Analytics"
   },
   "auth": {
     "signIn": "Sign in",
@@ -91,7 +92,14 @@
       "error": "Couldn't load the overview.",
       "loading": "Loading overview…",
       "tableCaption": "Chart data as a table",
-      "tablePeriod": "Period"
+      "tablePeriod": "Period",
+      "customRange": "Custom range",
+      "pickRange": "Pick a start and an end date",
+      "confirm": "Confirm",
+      "perMonth": "Per month",
+      "paidOutByWorker": "Paid out by worker",
+      "paidOutByWorkerDesc": "Who the payouts went to in this period",
+      "unknownWorker": "Unknown worker"
     }
   },
   "receipt": {
@@ -332,5 +340,10 @@
     "noPayouts": "No payouts yet",
     "noPayoutsDesc": "Generate your first payout to start building your library.",
     "loadMore": "Load more ({{count}} remaining)"
+  },
+  "analytics": {
+    "eyebrow": "Insights",
+    "title": "Analytics",
+    "description": "Revenue, payouts and who they went to, for any period you choose."
   }
 }

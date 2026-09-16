@@ -1,12 +1,13 @@
 /**
- * Pure helpers for the dashboard overview: period windows, bucketing,
- * totals, deltas and compact formatting. No React, no IO.
+ * Pure helpers for the dashboard / analytics overview: period windows,
+ * bucketing, totals, deltas, grouping and compact formatting. No React, no IO.
  */
 import {
   addDays,
   differenceInCalendarDays,
   format,
   parseISO,
+  startOfMonth,
   startOfWeek,
   subDays,
   subMonths,
@@ -16,8 +17,18 @@ import { ar, enGB } from "date-fns/locale";
 export type RangePreset = "1m" | "3m";
 export const RANGE_PRESETS: readonly RangePreset[] = ["1m", "3m"] as const;
 
-export type Granularity = "day" | "week";
+/** What the user picked: a quick preset or an explicit from/to (ISO dates, inclusive). */
+export type RangeSelection =
+  { kind: "preset"; preset: RangePreset } | { kind: "custom"; from: string; to: string };
+
+export type Granularity = "day" | "week" | "month";
 export type StatsWindow = { from: string; to: string };
+export type ResolvedRange = {
+  current: StatsWindow;
+  previous: StatsWindow;
+  granularity: Granularity;
+  days: number;
+};
 
 /** Raw shapes returned by the `dashboard_stats` RPC. */
 export type StatsDay = {
@@ -33,11 +44,19 @@ export type StatsServiceDay = {
   invoiced_pence: number;
   invoice_count: number;
 };
+export type StatsWorkerDay = {
+  day: string;
+  worker_id: string | null;
+  worker_name: string | null;
+  paid_out_pence: number;
+  payout_count: number;
+};
 export type DashboardStatsRaw = {
   from: string;
   to: string;
   days: StatsDay[];
   service_days: StatsServiceDay[];
+  worker_days: StatsWorkerDay[];
 };
 
 const toISO = (d: Date) => format(d, "yyyy-MM-dd");
@@ -46,25 +65,36 @@ export function dateLocale(lang: string) {
   return lang === "ar" ? ar : enGB;
 }
 
-export function granularityFor(preset: RangePreset): Granularity {
-  return preset === "1m" ? "day" : "week";
+/** Bucket size that keeps a chart readable: daily up to ~6 weeks, weekly up to ~6 months, then monthly. */
+export function granularityForSpan(days: number): Granularity {
+  if (days <= 45) return "day";
+  if (days <= 200) return "week";
+  return "month";
 }
 
 /**
- * Current window = the last 1 or 3 calendar months ending today (inclusive).
- * Previous window = the same number of days immediately before it.
+ * Presets end today: "1m" = the last calendar month, "3m" = the last three.
+ * The previous window is always the same number of days immediately before the current one,
+ * so deltas compare like with like.
  */
-export function presetWindows(
-  preset: RangePreset,
-  todayISO: string,
-): { current: StatsWindow; previous: StatsWindow; granularity: Granularity } {
+export function resolveRange(selection: RangeSelection, todayISO: string): ResolvedRange {
   const today = parseISO(todayISO);
-  const from = addDays(subMonths(today, preset === "1m" ? 1 : 3), 1);
-  const length = differenceInCalendarDays(today, from) + 1;
+  let from: Date;
+  let to: Date;
+  if (selection.kind === "preset") {
+    from = addDays(subMonths(today, selection.preset === "1m" ? 1 : 3), 1);
+    to = today;
+  } else {
+    from = parseISO(selection.from);
+    to = parseISO(selection.to);
+    if (to < from) [from, to] = [to, from];
+  }
+  const days = differenceInCalendarDays(to, from) + 1;
   return {
-    current: { from: toISO(from), to: toISO(today) },
-    previous: { from: toISO(subDays(from, length)), to: toISO(subDays(from, 1)) },
-    granularity: granularityFor(preset),
+    current: { from: toISO(from), to: toISO(to) },
+    previous: { from: toISO(subDays(from, days)), to: toISO(subDays(from, 1)) },
+    granularity: granularityForSpan(days),
+    days,
   };
 }
 
@@ -137,12 +167,18 @@ export type Bucket = {
 };
 
 function bucketStart(day: Date, granularity: Granularity): Date {
-  return granularity === "day" ? day : startOfWeek(day, { weekStartsOn: 1 });
+  if (granularity === "day") return day;
+  if (granularity === "week") return startOfWeek(day, { weekStartsOn: 1 });
+  return startOfMonth(day);
 }
 
-/** Zero-filled day rows → daily or Monday-start weekly buckets, in chronological order. */
-export function bucketDays(days: StatsDay[], granularity: Granularity, lang: string): Bucket[] {
+function bucketLabel(start: Date, granularity: Granularity, lang: string): string {
   const locale = dateLocale(lang);
+  return format(start, granularity === "month" ? "MMM yyyy" : "d MMM", { locale });
+}
+
+/** Zero-filled day rows → daily, Monday-start weekly or monthly buckets, in chronological order. */
+export function bucketDays(days: StatsDay[], granularity: Granularity, lang: string): Bucket[] {
   const map = new Map<string, Bucket>();
   for (const d of days) {
     const start = bucketStart(parseISO(d.day), granularity);
@@ -152,7 +188,7 @@ export function bucketDays(days: StatsDay[], granularity: Granularity, lang: str
       b = {
         key,
         start,
-        label: format(start, "d MMM", { locale }),
+        label: bucketLabel(start, granularity, lang),
         invoiced: 0,
         paidOut: 0,
         invoices: 0,
@@ -168,45 +204,76 @@ export function bucketDays(days: StatsDay[], granularity: Granularity, lang: str
   return [...map.values()];
 }
 
-export type ServiceTotal = { service: string | null; invoiced: number; invoices: number };
+/* ---------- Grouped series (revenue by service, payouts by worker, ...) ---------- */
 
-/** Internal map key for receipts without a service (custom line items). */
-const CUSTOM_KEY = "::custom-line-items::";
-const serviceKey = (service: string | null) => service ?? CUSTOM_KEY;
+/** One day of one group: `id` is the stable identity, `name` what we show. */
+export type GroupDay = {
+  day: string;
+  id: string | null;
+  name: string | null;
+  pence: number;
+  count: number;
+};
+export type GroupTotal = { id: string | null; name: string | null; pence: number; count: number };
 
-export function serviceTotals(rows: StatsServiceDay[]): ServiceTotal[] {
-  const map = new Map<string, ServiceTotal>();
-  for (const r of rows) {
-    const k = serviceKey(r.service);
-    const s = map.get(k) ?? { service: r.service, invoiced: 0, invoices: 0 };
-    s.invoiced += r.invoiced_pence;
-    s.invoices += r.invoice_count;
-    map.set(k, s);
-  }
-  return [...map.values()].sort(
-    (a, b) => b.invoiced - a.invoiced || (a.service ?? "").localeCompare(b.service ?? ""),
-  );
-}
+export const SERIES_SLOTS = ["s0", "s1", "s2", "s3", "s4"] as const;
+export type SeriesSlot = (typeof SERIES_SLOTS)[number];
+export type SeriesKey = SeriesSlot | "other";
 
-export const SERVICE_SLOTS = ["s0", "s1", "s2", "s3", "s4"] as const;
-export type ServiceSlot = (typeof SERVICE_SLOTS)[number];
-export type ServiceSeriesKey = ServiceSlot | "other";
-
-export type ServiceSeries = {
-  key: ServiceSeriesKey;
-  service: string | null;
-  invoiced: number;
-  invoices: number;
+export type GroupSeries = {
+  key: SeriesKey;
+  id: string | null;
+  name: string | null;
+  pence: number;
+  count: number;
   isOther: boolean;
 };
 
-/** Top N services take fixed slots; everything else folds into "other" (omitted when empty). */
-export function topServices(sorted: ServiceTotal[], n = SERVICE_SLOTS.length): ServiceSeries[] {
-  const top: ServiceSeries[] = sorted.slice(0, n).map((s, i) => ({
-    key: SERVICE_SLOTS[i],
-    service: s.service,
-    invoiced: s.invoiced,
-    invoices: s.invoices,
+export type SeriesRow = { key: string; label: string } & Partial<Record<SeriesKey, number>>;
+
+const UNNAMED_KEY = "::unnamed::";
+const groupKey = (g: { id: string | null; name: string | null }) => g.id ?? g.name ?? UNNAMED_KEY;
+
+export const serviceGroupDays = (rows: StatsServiceDay[]): GroupDay[] =>
+  rows.map((r) => ({
+    day: r.day,
+    id: r.service,
+    name: r.service,
+    pence: r.invoiced_pence,
+    count: r.invoice_count,
+  }));
+
+export const workerGroupDays = (rows: StatsWorkerDay[]): GroupDay[] =>
+  rows.map((r) => ({
+    day: r.day,
+    id: r.worker_id,
+    name: r.worker_name,
+    pence: r.paid_out_pence,
+    count: r.payout_count,
+  }));
+
+export function groupTotals(rows: GroupDay[]): GroupTotal[] {
+  const map = new Map<string, GroupTotal>();
+  for (const r of rows) {
+    const k = groupKey(r);
+    const g = map.get(k) ?? { id: r.id, name: r.name, pence: 0, count: 0 };
+    g.pence += r.pence;
+    g.count += r.count;
+    map.set(k, g);
+  }
+  return [...map.values()].sort(
+    (a, b) => b.pence - a.pence || (a.name ?? "").localeCompare(b.name ?? ""),
+  );
+}
+
+/** Top N groups take fixed colour slots; everything else folds into "other" (omitted when empty). */
+export function topGroups(sorted: GroupTotal[], n = SERIES_SLOTS.length): GroupSeries[] {
+  const top: GroupSeries[] = sorted.slice(0, n).map((g, i) => ({
+    key: SERIES_SLOTS[i],
+    id: g.id,
+    name: g.name,
+    pence: g.pence,
+    count: g.count,
     isOther: false,
   }));
   const rest = sorted.slice(n);
@@ -215,57 +282,60 @@ export function topServices(sorted: ServiceTotal[], n = SERVICE_SLOTS.length): S
     ...top,
     {
       key: "other",
-      service: null,
-      invoiced: rest.reduce((a, s) => a + s.invoiced, 0),
-      invoices: rest.reduce((a, s) => a + s.invoices, 0),
+      id: null,
+      name: null,
+      pence: rest.reduce((a, g) => a + g.pence, 0),
+      count: rest.reduce((a, g) => a + g.count, 0),
       isOther: true,
     },
   ];
 }
 
-export type ServiceRow = { key: string; label: string } & Partial<Record<ServiceSeriesKey, number>>;
-
-/** Pivot per-service day rows into one row per bucket with a column per series (zero-filled). */
-export function pivotServiceDays(
+/**
+ * Pivot per-group day rows into one row per bucket with a column per series (zero-filled).
+ * "other" is derived from the bucket's overall total so it is exact even when groups are folded.
+ */
+export function pivotGroupDays(
   days: StatsDay[],
-  rows: StatsServiceDay[],
-  series: ServiceSeries[],
+  rows: GroupDay[],
+  series: GroupSeries[],
   granularity: Granularity,
   lang: string,
-): ServiceRow[] {
+  bucketTotal: (bucket: Bucket) => number,
+): SeriesRow[] {
   const buckets = bucketDays(days, granularity, lang);
-  const slotFor = new Map<string, ServiceSeriesKey>();
-  for (const s of series) if (!s.isOther) slotFor.set(serviceKey(s.service), s.key);
+  const slotFor = new Map<string, SeriesKey>();
+  for (const s of series) if (!s.isOther) slotFor.set(groupKey(s), s.key);
   const hasOther = series.some((s) => s.isOther);
 
-  const out = new Map<string, ServiceRow>();
+  const out = new Map<string, SeriesRow>();
   for (const b of buckets) {
-    const row: ServiceRow = { key: b.key, label: b.label };
+    const row: SeriesRow = { key: b.key, label: b.label };
     for (const s of series) row[s.key] = 0;
     out.set(b.key, row);
   }
   for (const r of rows) {
     const key = toISO(bucketStart(parseISO(r.day), granularity));
     const row = out.get(key);
-    const slot = slotFor.get(serviceKey(r.service));
+    const slot = slotFor.get(groupKey(r));
     if (!row || !slot) continue;
-    row[slot] = (row[slot] ?? 0) + r.invoiced_pence;
+    row[slot] = (row[slot] ?? 0) + r.pence;
   }
   if (hasOther) {
     for (const b of buckets) {
       const row = out.get(b.key);
       if (!row) continue;
-      const named = SERVICE_SLOTS.reduce((a, k) => a + (row[k] ?? 0), 0);
-      row.other = Math.max(0, b.invoiced - named);
+      const named = SERIES_SLOTS.reduce((a, k) => a + (row[k] ?? 0), 0);
+      row.other = Math.max(0, bucketTotal(b) - named);
     }
   }
   return [...out.values()];
 }
 
-export function serviceLabel(
-  s: { service: string | null; isOther: boolean },
-  labels: { custom: string; other: string },
+export function seriesLabel(
+  s: { name: string | null; isOther: boolean },
+  labels: { unnamed: string; other: string },
 ): string {
   if (s.isOther) return labels.other;
-  return s.service ?? labels.custom;
+  return s.name ?? labels.unnamed;
 }

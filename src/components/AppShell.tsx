@@ -1,6 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutGrid, Settings, Sparkles, LogOut, Menu, X, Users, Banknote, HardHat } from "lucide-react";
+import {
+  LayoutGrid,
+  Settings,
+  Sparkles,
+  LogOut,
+  Menu,
+  X,
+  Users,
+  Banknote,
+  HardHat,
+  TrendingUp,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchBusinessSettings, signedUrl, LOGO_BUCKET } from "@/lib/api";
@@ -20,10 +31,13 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
     { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutGrid },
     { label: t("nav.payouts"), to: "/payouts", icon: Banknote },
     { label: t("nav.services"), to: "/services", icon: Sparkles },
-    ...(profile?.is_admin ? [
-      { label: t("nav.managers"), to: "/managers", icon: Users },
-      { label: t("nav.workers"), to: "/workers", icon: HardHat },
-    ] : []),
+    { label: t("nav.analytics"), to: "/analytics", icon: TrendingUp },
+    ...(profile?.is_admin
+      ? [
+          { label: t("nav.managers"), to: "/managers", icon: Users },
+          { label: t("nav.workers"), to: "/workers", icon: HardHat },
+        ]
+      : []),
     { label: t("nav.settings"), to: "/settings", icon: Settings },
   ] as const;
 
