@@ -42,6 +42,7 @@ export function StackedSeriesChart({
   rows,
   granularity,
   labels,
+  tourId,
 }: {
   title: string;
   description: string;
@@ -52,6 +53,7 @@ export function StackedSeriesChart({
   rows: SeriesRow[];
   granularity: Granularity;
   labels: { unnamed: string; other: string };
+  tourId?: string;
 }) {
   const { t, i18n } = useTranslation();
   const reduced = usePrefersReducedMotion();
@@ -82,6 +84,7 @@ export function StackedSeriesChart({
 
   return (
     <ChartCard
+      tourId={tourId}
       eyebrow={t(GRANULARITY_KEY[granularity])}
       title={title}
       description={description}

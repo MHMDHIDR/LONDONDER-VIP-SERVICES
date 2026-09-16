@@ -51,6 +51,7 @@ export function MoneyFlowChart({
 
   return (
     <ChartCard
+      tourId="chart-money-flow"
       eyebrow={t(GRANULARITY_KEY[granularity])}
       title={t("dashboard.overview.moneyFlow")}
       description={t("dashboard.overview.moneyFlowDesc")}

@@ -61,6 +61,7 @@ export function OverviewSection({
               totals={model.current}
             />
             <StackedSeriesChart
+              tourId="chart-by-service"
               title={t("dashboard.overview.byService")}
               description={t("dashboard.overview.byServiceDesc")}
               summaryLabel={t("dashboard.overview.invoiced")}

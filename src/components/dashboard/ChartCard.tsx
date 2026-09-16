@@ -11,6 +11,8 @@ type ChartCardProps = {
   /** Screen-reader table twin of the plotted data. */
   table?: ReactNode;
   className?: string;
+  /** Anchor for the product tour (`data-tour`). */
+  tourId?: string;
 };
 
 export function ChartCard({
@@ -21,9 +23,14 @@ export function ChartCard({
   children,
   table,
   className,
+  tourId,
 }: ChartCardProps) {
   return (
-    <section className={cn("surface-card min-w-0 rounded-xl py-5", className)} aria-label={title}>
+    <section
+      className={cn("surface-card min-w-0 rounded-xl py-5", className)}
+      aria-label={title}
+      data-tour={tourId}
+    >
       <header className="mb-4 flex flex-wrap items-start justify-between gap-x-4 gap-y-2 px-5">
         <div className="min-w-0">
           <p className="text-eyebrow">{eyebrow}</p>

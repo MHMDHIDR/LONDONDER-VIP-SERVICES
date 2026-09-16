@@ -66,7 +66,7 @@ export function RangeControl({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2" data-tour="overview-period">
       <div className="flex flex-wrap items-center gap-1.5">
         <ToggleGroup
           type="single"
@@ -89,6 +89,7 @@ export function RangeControl({
             <button
               type="button"
               aria-pressed={isCustom}
+              data-tour="range-custom"
               className={cn(PILL_BASE, isCustom && PILL_ON)}
             >
               <CalendarDays aria-hidden="true" className="h-3.5 w-3.5" />

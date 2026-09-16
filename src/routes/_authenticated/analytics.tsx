@@ -31,6 +31,7 @@ function AnalyticsPage() {
         extra={(model) => (
           <div className="lg:col-span-2">
             <StackedSeriesChart
+              tourId="chart-by-worker"
               title={t("dashboard.overview.paidOutByWorker")}
               description={t("dashboard.overview.paidOutByWorkerDesc")}
               summaryLabel={t("dashboard.overview.paidOut")}

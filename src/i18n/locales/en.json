@@ -345,5 +345,57 @@
     "eyebrow": "Insights",
     "title": "Analytics",
     "description": "Revenue, payouts and who they went to, for any period you choose."
+  },
+  "tours": {
+    "help": "Show me around",
+    "helpNew": "New here? Take the tour",
+    "next": "Next",
+    "previous": "Back",
+    "done": "Done",
+    "progress": "{{current}} of {{total}}",
+    "dashboardOverview": {
+      "steps": {
+        "period": {
+          "title": "Choose a period",
+          "description": "Last month and Last 3 months are one tap away. Custom range lets you pick exact dates, and everything below follows your choice."
+        },
+        "kpis": {
+          "title": "Your headline numbers",
+          "description": "Invoiced, paid out and what you kept, each with the change against the previous period of the same length."
+        },
+        "moneyFlow": {
+          "title": "Money in, money out",
+          "description": "Gold is invoiced, slate is paid out. Hover any point for exact figures; the period totals sit in the corner."
+        },
+        "byService": {
+          "title": "Where revenue comes from",
+          "description": "Each colour is one of your top services, stacked over time. The legend shows every service's total for the period."
+        },
+        "library": {
+          "title": "Your invoice library",
+          "description": "Every invoice you have issued, newest first. Search by number, customer or service, then view or download the PDF."
+        },
+        "analytics": {
+          "title": "Go deeper in Analytics",
+          "description": "The same overview with any date range you like, plus payouts split by worker."
+        }
+      }
+    },
+    "analytics": {
+      "steps": {
+        "custom": {
+          "title": "Any dates you like",
+          "description": "Open the calendar, pick a start and an end date, then confirm. Changes are compared with the period just before it."
+        },
+        "byWorker": {
+          "title": "Paid out by worker",
+          "description": "Who your payouts went to, stacked over time, with each worker's total in the legend."
+        },
+        "help": {
+          "title": "Replay any time",
+          "description": "This button restarts the tour of whichever page you are on, and lights up when something new is waiting."
+        }
+      }
+    }
   }
 }

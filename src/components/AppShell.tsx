@@ -16,6 +16,8 @@ import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchBusinessSettings, signedUrl, LOGO_BUCKET } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { TourHelpButton } from "@/tours/TourHelpButton";
+import { TourManager } from "@/tours/TourManager";
 
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +33,7 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
     { label: t("nav.dashboard"), to: "/dashboard", icon: LayoutGrid },
     { label: t("nav.payouts"), to: "/payouts", icon: Banknote },
     { label: t("nav.services"), to: "/services", icon: Sparkles },
-    { label: t("nav.analytics"), to: "/analytics", icon: TrendingUp },
+    { label: t("nav.analytics"), to: "/analytics", icon: TrendingUp, tour: "nav-analytics" },
     ...(profile?.is_admin
       ? [
           { label: t("nav.managers"), to: "/managers", icon: Users },
@@ -93,12 +95,14 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
               <Link
                 key={item.to}
                 to={item.to}
+                data-tour={(item as { tour?: string }).tour}
                 className="rounded-md px-3 py-2 text-sm text-ink-foreground/70 transition-colors hover:bg-white/10 hover:text-ink-foreground"
                 activeProps={{ className: "bg-white/10 text-ink-foreground" }}
               >
                 {item.label}
               </Link>
             ))}
+            <TourHelpButton className="ms-2" />
             <button
               type="button"
               onClick={handleSignOut}
@@ -109,9 +113,10 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
             </button>
           </nav>
 
+          <TourHelpButton className="ms-auto h-10 w-10 md:hidden" />
           <button
             type="button"
-            className="ms-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 md:hidden"
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
@@ -150,6 +155,8 @@ export function AppShell({ children, profile }: { children: ReactNode; profile?:
           </nav>
         ) : null}
       </header>
+
+      <TourManager />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>

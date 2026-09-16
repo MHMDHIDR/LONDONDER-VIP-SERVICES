@@ -68,7 +68,7 @@ export function KpiStrip({ current, previous }: { current: Totals; previous: Tot
   const count = (n: number) => new Intl.NumberFormat("en-GB").format(n);
 
   return (
-    <div className="surface-card overflow-hidden rounded-xl">
+    <div className="surface-card overflow-hidden rounded-xl" data-tour="overview-kpis">
       <dl className="grid grid-cols-2 gap-px bg-border lg:grid-cols-4">
         <Tile
           label={t("dashboard.overview.invoiced")}

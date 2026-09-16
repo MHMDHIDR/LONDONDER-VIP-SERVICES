@@ -57,7 +57,7 @@ function DashboardPage() {
 
       <OverviewSection className="mb-10" />
 
-      <div className="mb-4">
+      <div className="mb-4" data-tour="invoice-library">
         <h2 className="font-display text-2xl">{t("dashboard.libraryTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.description")}</p>
       </div>

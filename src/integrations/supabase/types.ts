@@ -624,6 +624,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_progress: {
+        Row: {
+          completed_at: string
+          dismissed: boolean
+          tour_id: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          completed_at?: string
+          dismissed?: boolean
+          tour_id: string
+          user_id: string
+          version: number
+        }
+        Update: {
+          completed_at?: string
+          dismissed?: boolean
+          tour_id?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       workers: {
         Row: {
           active: boolean
