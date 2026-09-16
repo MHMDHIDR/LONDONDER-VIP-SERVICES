@@ -285,6 +285,7 @@ function ManagerDetailsPage() {
                                       try {
                                         await restoreReceipt(r.id);
                                         queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
+                                        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
                                         toast.success("Receipt restored successfully");
                                       } catch (err: any) {
                                         toast.error("Failed to restore receipt");
@@ -318,6 +319,7 @@ function ManagerDetailsPage() {
                                       try {
                                         await softDeleteReceipt(r.id, r.pdf_path);
                                         queryClient.invalidateQueries({ queryKey: ["manager-receipts", id] });
+                                        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
                                         toast.success("Receipt deleted successfully");
                                       } catch (err: any) {
                                         toast.error("Failed to delete receipt");

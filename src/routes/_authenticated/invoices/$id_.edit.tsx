@@ -204,6 +204,7 @@ function EditReceiptPage() {
       toast.success("Receipt updated");
       queryClient.invalidateQueries({ queryKey: ["receipt", id] });
       queryClient.invalidateQueries({ queryKey: ["receipts"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
       navigate({ to: "/invoices/$id", params: { id } });
     },
     onError: (error: Error) => setFormError(error.message),

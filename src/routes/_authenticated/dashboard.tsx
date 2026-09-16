@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 
 const PAGE_SIZE = 11;
 
@@ -41,9 +42,9 @@ function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow={t("dashboard.eyebrow")}
+        eyebrow={t("dashboard.overviewEyebrow")}
         title={t("dashboard.title")}
-        description={t("dashboard.description")}
+        description={t("dashboard.overviewDescription")}
         actions={
           <Button asChild variant="premium" size="lg">
             <Link to="/invoices/new">
@@ -53,6 +54,13 @@ function DashboardPage() {
           </Button>
         }
       />
+
+      <DashboardOverview />
+
+      <div className="mb-4">
+        <h2 className="font-display text-2xl">{t("dashboard.libraryTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.description")}</p>
+      </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-sm">
@@ -130,11 +138,17 @@ function DashboardPage() {
                   </p>
 
                   <div className="mt-2 flex items-center gap-2">
-                    <Link to="/managers/$id" params={{ id: receipt.user_id }} className="flex items-center gap-2 hover:underline">
+                    <Link
+                      to="/managers/$id"
+                      params={{ id: receipt.user_id }}
+                      className="flex items-center gap-2 hover:underline"
+                    >
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground uppercase">
                         {receipt.creator?.full_name?.charAt(0) || "?"}
                       </div>
-                      <span className="text-xs text-muted-foreground">{receipt.creator?.full_name || "Unknown"}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {receipt.creator?.full_name || "Unknown"}
+                      </span>
                     </Link>
                   </div>
 

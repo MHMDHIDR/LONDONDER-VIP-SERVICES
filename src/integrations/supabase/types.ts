@@ -691,6 +691,10 @@ export type Database = {
         }
         Returns: string
       }
+      dashboard_stats: {
+        Args: { _from: string; _to: string }
+        Returns: Json
+      }
       resolve_service_price: {
         Args: { _at: string; _service_id: string }
         Returns: number

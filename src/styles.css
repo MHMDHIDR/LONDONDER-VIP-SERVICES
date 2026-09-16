@@ -49,6 +49,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-other: var(--chart-other);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -100,11 +102,14 @@
   --input: oklch(0.88 0.014 85);
   --ring: oklch(0.72 0.09 82);
 
-  --chart-1: oklch(0.72 0.09 82);
-  --chart-2: oklch(0.35 0.02 70);
-  --chart-3: oklch(0.55 0.09 155);
-  --chart-4: oklch(0.85 0.05 85);
-  --chart-5: oklch(0.25 0.01 60);
+  /* Chart series palette: fixed slot order, validated for colour-vision safety on the card surface. */
+  --chart-1: oklch(0.7 0.13 80); /* gold: invoiced / service 1 */
+  --chart-2: oklch(0.55 0.13 262); /* slate: paid out / service 2 */
+  --chart-3: oklch(0.6 0.12 145); /* green */
+  --chart-4: oklch(0.52 0.14 300); /* violet */
+  --chart-5: oklch(0.6 0.15 40); /* terracotta */
+  --chart-6: oklch(0.52 0.15 340); /* plum */
+  --chart-other: oklch(0.75 0.01 80); /* de-emphasis grey for "Other" */
 
   --sidebar: oklch(0.16 0.005 60);
   --sidebar-foreground: oklch(0.95 0.008 85);
